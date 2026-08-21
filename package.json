@@ -1,0 +1,26 @@
+{
+  "name": "podcast-studio-web",
+  "version": "0.1.0",
+  "description": "The public browser application for Wiplash Podcast Studio.",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/web",
+    "packages/contracts"
+  ],
+  "scripts": {
+    "build": "npm run build -w @wiplash/podcast-contracts && npm run build -w @wiplash/podcast-web",
+    "dev": "npm run build -w @wiplash/podcast-contracts && npm run dev -w @wiplash/podcast-web",
+    "test": "npm run build -w @wiplash/podcast-contracts && npm run test -w @wiplash/podcast-contracts && npm run test -w @wiplash/podcast-web",
+    "typecheck": "npm run build -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-web",
+    "boundary:check": "node scripts/check-public-boundary.mjs && node scripts/check-gateway-boundary.mjs",
+    "verify": "npm run boundary:check && npm run test && npm run typecheck && npm run build"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

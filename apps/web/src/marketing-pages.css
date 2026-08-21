@@ -1,0 +1,127 @@
+.marketing-main {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: #f8f6ff;
+  background:
+    radial-gradient(circle at 84% 5%, rgba(109, 40, 217, .2), transparent 28%),
+    radial-gradient(circle at 14% 24%, rgba(76, 29, 149, .12), transparent 32%),
+    #08070a;
+}
+
+.marketing-main a { color: inherit; }
+.marketing-hero { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: clamp(82px, 11vw, 148px) 0 70px; }
+.marketing-hero .eyebrow { color: #a78bfa; }
+.marketing-hero h1 { max-width: 1020px; font-size: clamp(48px, 7vw, 96px); line-height: .96; letter-spacing: -.065em; }
+.marketing-hero h1 span { color: #9c82f4; }
+.marketing-hero > p:not(.eyebrow) { max-width: 850px; margin: 30px 0 0; color: #c5bdcc; font-size: clamp(20px, 1.65vw, 25px); line-height: 1.62; }
+
+.pricing-availability-note { width: max-content; max-width: 100%; margin-top: 34px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; color: #e0d5f4; background: rgba(124, 58, 237, .1); border: 1px solid rgba(167, 139, 250, .24); border-radius: 999px; font-size: 16px; line-height: 1.45; }
+.pricing-availability-note i { width: 9px; height: 9px; flex: none; background: #a78bfa; border-radius: 50%; box-shadow: 0 0 0 5px rgba(139, 92, 246, .12); }
+
+.pricing-access-note { width: min(1180px, calc(100% - 48px)); margin: 0 auto 24px; padding: 24px 26px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; }
+.pricing-access-note > span { color: #b9a1fb; font: 500 12px var(--mono); letter-spacing: .13em; }
+.pricing-access-note strong { font-size: 20px; }
+.pricing-access-note p { margin: 5px 0 0; color: #b1a9b9; font-size: 16px; line-height: 1.58; }
+.pricing-access-note button { min-height: 48px; padding: 0 19px; display: flex; align-items: center; gap: 20px; color: #fff; background: #6d28d9; border: 0; border-radius: 11px; font-size: 15px; font-weight: 800; }
+.pricing-access-note button:hover { background: #7c3aed; }
+
+.pricing-grid { width: min(1380px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 110px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.pricing-grid > article { min-width: 0; padding: 29px 25px 25px; position: relative; display: flex; flex-direction: column; color: #eae5ef; background: rgba(20, 17, 24, .94); border: 1px solid rgba(255,255,255,.1); border-radius: 22px; box-shadow: 0 25px 70px rgba(0,0,0,.2); }
+.pricing-grid article > header { min-height: 88px; padding-bottom: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.pricing-grid article > header h2 { margin: 0; font-size: 32px; letter-spacing: -.045em; }
+.plan-price { min-width: 90px; display: grid; justify-items: end; gap: 2px; text-align: right; }
+.plan-price strong { color: #e2d6ff; font-size: 24px; line-height: 1; letter-spacing: -.04em; }
+.plan-price span { color: #81778a; font: 10px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+.pricing-grid article > p { min-height: 108px; margin: 22px 0 0; color: #b7afbf; font-size: 16px; line-height: 1.62; }
+.pricing-grid dl { margin: 20px 0 0; display: grid; gap: 8px; }
+.pricing-grid dl div { padding: 10px 0; display: grid; gap: 4px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.pricing-grid dt { color: #8f8798; font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.pricing-grid dd { margin: 0; font-size: 15px; font-weight: 700; }
+.pricing-grid ul { margin: 20px 0 28px; padding: 0; display: grid; gap: 11px; list-style: none; }
+.pricing-grid li { display: flex; align-items: flex-start; gap: 10px; color: #d0cad5; font-size: 15px; line-height: 1.5; }
+.pricing-grid li i { width: 5px; height: 5px; margin-top: 6px; flex: none; background: #8b5cf6; border-radius: 50%; }
+.plan-action { width: 100%; min-height: 48px; margin-top: auto; display: grid; place-items: center; color: #fff; background: #6d28d9; border: 0; border-radius: 11px; font-size: 15px; font-weight: 800; text-decoration: none; }
+.plan-action:hover { background: #7c3aed; }
+.plan-action.secondary { color: #d7c9f4; background: rgba(124,58,237,.08); border: 1px solid rgba(167,139,250,.25); }
+.plan-action.secondary:hover { background: rgba(124,58,237,.18); }
+.plan-action:disabled { cursor: wait; opacity: .68; }
+.plan-action.secondary.unavailable { cursor: default; opacity: .72; }
+.plan-action.secondary.unavailable:hover { background: rgba(124,58,237,.08); }
+
+.pricing-principles, .pricing-faq { padding: 100px max(24px, calc((100vw - 1180px) / 2)); border-top: 1px solid rgba(255,255,255,.08); }
+.pricing-principles { background: #0d0b10; }
+.pricing-principles > header, .pricing-faq > header { max-width: 790px; }
+.pricing-principles h2, .pricing-faq h2 { margin: 0; font-size: clamp(37px, 5vw, 66px); line-height: 1.02; letter-spacing: -.055em; }
+.pricing-principles > div { margin-top: 50px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pricing-principles article { padding: 27px; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; }
+.pricing-principles article > span { color: #8b5cf6; font: 500 10px var(--mono); }
+.pricing-principles h3 { margin: 38px 0 0; font-size: 21px; }
+.pricing-principles article p { margin: 10px 0 0; color: #b1a9b9; font-size: 17px; line-height: 1.65; }
+.pricing-faq > div { margin-top: 48px; border-top: 1px solid rgba(255,255,255,.11); }
+.pricing-faq details { border-bottom: 1px solid rgba(255,255,255,.11); }
+.pricing-faq summary { padding: 24px 3px; color: #eeeaf2; font-size: 19px; font-weight: 750; cursor: pointer; }
+.pricing-faq details p { max-width: 850px; margin: -5px 0 26px; color: #b8b0c0; font-size: 17px; line-height: 1.72; }
+
+.privacy-summary { margin: 48px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(255,255,255,.13); border-bottom: 1px solid rgba(255,255,255,.13); }
+.privacy-summary div { min-width: 0; padding: 18px 18px 18px 0; display: grid; gap: 7px; }
+.privacy-summary div + div { padding-left: 18px; border-left: 1px solid rgba(255,255,255,.13); }
+.privacy-summary dt { color: #938a9a; font: 500 11px var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+.privacy-summary dd { margin: 0; color: #e2dce6; font-size: 15px; line-height: 1.55; }
+.privacy-summary a { color: #c4b5fd; }
+.privacy-callout { width: min(1180px, calc(100% - 48px)); margin: 0 auto 80px; padding: 26px 29px; display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 26px; color: #e9e4ee; background: rgba(109,40,217,.09); border: 1px solid rgba(167,139,250,.22); border-radius: 19px; }
+.privacy-callout strong { color: #d1c3fa; font-size: 18px; }
+.privacy-callout p { margin: 0; color: #c0b8c7; font-size: 17px; line-height: 1.72; }
+.policy-body { width: min(1240px, calc(100% - 48px)); margin: 0 auto 110px; display: grid; grid-template-columns: 285px minmax(0, 1fr); gap: 74px; }
+.policy-body > nav { height: max-content; padding: 20px 0; position: sticky; top: 18px; display: grid; gap: 3px; }
+.policy-body > nav > span { margin-bottom: 12px; color: #a78bfa; font: 600 11px var(--mono); letter-spacing: .13em; }
+.policy-body > nav a { padding: 7px 0; overflow: hidden; color: #9a929f; font-size: 13px; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.policy-body > nav a:hover { color: #c4b5fd; }
+.policy-sections > section { padding: 0 0 52px; display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 17px; scroll-margin-top: 24px; }
+.policy-sections > section + section { padding-top: 52px; border-top: 1px solid rgba(255,255,255,.09); }
+.policy-sections > section > span { padding-top: 7px; color: #a78bfa; font: 500 12px var(--mono); }
+.policy-sections h2 { margin: 0 0 17px; font-size: clamp(28px, 3vw, 39px); letter-spacing: -.04em; }
+.policy-sections p { margin: 0; color: #beb6c5; font-size: 18px; line-height: 1.78; }
+.policy-sections p + p { margin-top: 14px; }
+.policy-sections a { color: #c4b5fd; text-underline-offset: 3px; }
+.marketing-footer { min-height: 170px; padding: 38px max(24px, calc((100vw - 1180px) / 2)); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 28px; color: #77707e; background: #050406; border-top: 1px solid rgba(255,255,255,.09); }
+.marketing-footer > div { display: grid; gap: 5px; }
+.marketing-footer strong { color: #e4dfe8; font-size: 17px; }
+.marketing-footer span { font-size: 14px; }
+.marketing-footer nav { display: flex; align-items: center; gap: 20px; }
+.marketing-footer a { color: #b8b0c0; font-size: 14px; text-decoration: none; }
+.marketing-footer a:hover { color: #c4b5fd; }
+.marketing-footer > small { grid-column: 1 / -1; font-size: 12px; }
+
+.account-plan-link { min-height: 38px; margin-top: 10px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; color: #c4b5fd; background: rgba(124,58,237,.08); border: 1px solid rgba(167,139,250,.18); border-radius: 10px; font-size: 11px; font-weight: 750; text-decoration: none; }
+.account-plan-link:hover { color: #fff; background: rgba(124,58,237,.16); }
+.account-plan-link span:last-child { font-size: 15px; }
+.wizard-account-upgrade { color: #c4b5fd; text-underline-offset: 2px; }
+.landing-nav a[aria-current="page"] { color: #ddd6fe; }
+
+@media (max-width: 1080px) {
+  .pricing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pricing-grid article > p { min-height: 0; }
+}
+
+@media (max-width: 760px) {
+  .marketing-hero { width: min(100% - 36px, 1180px); padding-top: 72px; }
+  .marketing-hero h1 { font-size: clamp(43px, 13vw, 66px); }
+  .pricing-availability-note { width: 100%; border-radius: 14px; }
+  .pricing-access-note { width: calc(100% - 36px); grid-template-columns: 1fr; gap: 10px; }
+  .pricing-access-note button { margin-top: 8px; justify-content: space-between; }
+  .pricing-grid { width: calc(100% - 28px); grid-template-columns: 1fr; padding-bottom: 80px; }
+  .pricing-principles, .pricing-faq { padding: 76px 20px; }
+  .pricing-principles > div { grid-template-columns: 1fr; }
+  .privacy-summary { grid-template-columns: 1fr; }
+  .privacy-summary div + div { padding-left: 0; border-top: 1px solid rgba(255,255,255,.13); border-left: 0; }
+  .privacy-callout { width: calc(100% - 36px); grid-template-columns: 1fr; }
+  .policy-body { width: calc(100% - 36px); grid-template-columns: 1fr; gap: 25px; }
+  .policy-body > nav { position: static; }
+  .policy-body > nav a { display: none; }
+  .policy-sections > section { grid-template-columns: 28px minmax(0, 1fr); gap: 10px; }
+  .marketing-footer { grid-template-columns: 1fr; }
+  .marketing-footer nav { flex-wrap: wrap; }
+  .marketing-footer > small { grid-column: auto; }
+}
