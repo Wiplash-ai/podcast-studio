@@ -565,7 +565,10 @@ function LandingView({
       <section className="landing-hero">
         <div className="landing-hero-copy">
           <p className="eyebrow">A Cloud recording room for remote podcasts</p>
-          <h1>Record a real podcast.<br /><span>Skip the production rig.</span></h1>
+          <h1>
+            <span className="landing-title-primary">Record a real podcast.</span>
+            <span>Skip the production rig.</span>
+          </h1>
           <p className="landing-lede">
             Invite your guest, talk face to face, and control the recording yourself. Podcast Studio moves the heavy media work to the Cloud.
           </p>

@@ -33,6 +33,10 @@ The development server listens on `127.0.0.1:5193` and proxies `/v1` and
 npm run verify
 ```
 
+Verification includes browser-safe boundary scans, unit tests, typechecks, a
+production build, and deterministic responsive checks from 320px phones through
+portrait tablets, including device setup, large rooms, and screen sharing.
+
 The production container accepts `VITE_BASE_PATH` and `VITE_API_URL` build
 arguments and serves the static application plus the same-origin API proxy on
 port `8080`.

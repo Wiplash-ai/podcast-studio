@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "dev": "vite --host 127.0.0.1",
+    "preview": "vite preview --host 127.0.0.1 --port 4193 --strictPort",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -b --pretty false"
   },
