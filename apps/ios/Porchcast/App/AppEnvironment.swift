@@ -13,6 +13,40 @@ nonisolated struct AppEnvironment: Sendable {
     let notifications: any NotificationService
     let watchBridge: any WatchBridge
 
+    /// Local Debug launches start in the deterministic offline experience so
+    /// a fresh checkout is immediately runnable without private services.
+    /// Release builds remain Cloud-first, and any explicit runtime value wins.
+    static func selectedForAppLaunch(
+        runtimeValue: String? = ProcessInfo.processInfo.environment[runtimeEnvironmentKey],
+        configuration: AppConfiguration = .cloudDefault
+    ) -> AppEnvironment {
+        #if DEBUG
+        let isDebugBuild = true
+        #else
+        let isDebugBuild = false
+        #endif
+
+        return selectedForAppLaunch(
+            runtimeValue: runtimeValue,
+            configuration: configuration,
+            isDebugBuild: isDebugBuild
+        )
+    }
+
+    static func selectedForAppLaunch(
+        runtimeValue: String?,
+        configuration: AppConfiguration = .cloudDefault,
+        isDebugBuild: Bool
+    ) -> AppEnvironment {
+        if runtimeValue != nil {
+            return selected(runtimeValue: runtimeValue, configuration: configuration)
+        }
+        if isDebugBuild {
+            return .deterministicDemo(configuration: configuration)
+        }
+        return selected(runtimeValue: nil, configuration: configuration)
+    }
+
     /// Cloud is the default. Demo mode requires an explicit environment value
     /// or configuration preference. Unknown environment values fail to Cloud.
     static func selected(

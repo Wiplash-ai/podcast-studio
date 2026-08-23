@@ -3,6 +3,43 @@ import Testing
 @testable import Porchcast
 
 struct DemoRepositoryTests {
+    @Test("Debug app launch defaults offline while Release remains Cloud-first")
+    func appLaunchDefaultsMatchBuildIntent() {
+        let compiledDebugDefault = AppEnvironment.selectedForAppLaunch(runtimeValue: nil)
+        let debug = AppEnvironment.selectedForAppLaunch(
+            runtimeValue: nil,
+            isDebugBuild: true
+        )
+        let release = AppEnvironment.selectedForAppLaunch(
+            runtimeValue: nil,
+            isDebugBuild: false
+        )
+
+        #expect(compiledDebugDefault.adapterMode == .deterministicDemo)
+        #expect(debug.adapterMode == .deterministicDemo)
+        #expect(release.adapterMode == .cloud)
+    }
+
+    @Test("An explicit runtime overrides the local Debug default")
+    func explicitRuntimeOverridesDebugDefault() {
+        let cloud = AppEnvironment.selectedForAppLaunch(
+            runtimeValue: "cloud",
+            isDebugBuild: true
+        )
+        let demo = AppEnvironment.selectedForAppLaunch(
+            runtimeValue: "demo",
+            isDebugBuild: false
+        )
+        let unknown = AppEnvironment.selectedForAppLaunch(
+            runtimeValue: "demoo",
+            isDebugBuild: true
+        )
+
+        #expect(cloud.adapterMode == .cloud)
+        #expect(demo.adapterMode == .deterministicDemo)
+        #expect(unknown.adapterMode == .cloud)
+    }
+
     @Test("Cloud remains the default configuration while demo adapters are explicit")
     func cloudDefaultWithExplicitDemoAdapters() {
         let cloud = AppEnvironment.selected(runtimeValue: nil)

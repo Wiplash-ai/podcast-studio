@@ -14,8 +14,10 @@ Xcode app and SDK alone are not enough to compile asset catalogs or run tests.
 
 Shared schemes:
 
-- `Porchcast`: Cloud is the default. Its adapters intentionally report
-  unavailable until the private OpenAPI, auth, and media implementations land.
+- `Porchcast`: a local Debug launch defaults to the deterministic offline UI so
+  the app runs immediately without private services. Set
+  `PORCHCAST_RUNTIME=cloud` in the scheme environment to exercise the Cloud
+  failure path. Release and App Store launches remain Cloud-first.
 - `Porchcast Demo`: explicitly sets `PORCHCAST_RUNTIME=demo` and runs the
   deterministic local UI without network, camera, microphone, timers, or
   randomness.

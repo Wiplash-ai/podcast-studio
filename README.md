@@ -45,10 +45,12 @@ build and `VITE_PORCHCAST_DEMO_SCENARIO` to one of the scenarios above. A
 
 ## Native iOS
 
-The universal SwiftUI project lives in `apps/ios`. Its `Porchcast` scheme is
-Cloud-first; until the private OpenAPI and native media adapters are connected,
-it presents a truthful unavailable state. The `Porchcast Demo` scheme opts into
-a deterministic, no-I/O native UI.
+The universal SwiftUI project lives in `apps/ios`. Local Debug launches run the
+deterministic, no-I/O native UI by default so a fresh checkout works offline.
+Release and App Store launches remain Cloud-first; until the private OpenAPI and
+native media adapters are connected, an explicit Cloud launch presents a
+truthful unavailable state. The `Porchcast Demo` scheme also forces the offline
+runtime explicitly.
 
 See `apps/ios/README.md` for Xcode setup, build commands, current boundaries,
 and the missing production adapters.

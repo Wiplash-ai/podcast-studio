@@ -55,9 +55,10 @@ It is not a pixel-for-pixel web wrapper.
 
 The current native scaffold supplies the SwiftUI module, domain model, deep
 service interfaces, deterministic demo adapters, and explicit unavailable
-Cloud adapters. The live OpenAPI, OIDC/Keychain, WebRTC, APNs, playback, file,
-and persistence adapters remain production work; no demo adapter silently
-stands in for them.
+Cloud adapters. Local Debug launches deliberately select the offline demo so a
+fresh checkout is runnable; Release/App Store builds remain Cloud-first and do
+not silently fall back. The live OpenAPI, OIDC/Keychain, WebRTC, APNs, playback,
+file, and persistence adapters remain production work.
 
 ## Native v1 scope
 
