@@ -22,12 +22,13 @@ export interface AccountModel {
   recordingLibrary: AccountRecordingLibrary | null;
   billing: AccountBillingSnapshot | null;
   status: "checking" | "available" | "unavailable";
-  busy: "checkout" | "claim" | "delete" | "invite" | "portal" | "sign-in" | "sign-out" | "update" | null;
+  busy: "checkout" | "claim" | "delete" | "invite" | "plan-change" | "portal" | "sign-in" | "sign-out" | "update" | null;
   error: string;
   refresh(): Promise<void>;
   signIn(): Promise<void>;
   signOut(): Promise<void>;
   subscribe(plan: PaidAccountPlan): Promise<void>;
+  changePlan(plan: PaidAccountPlan): Promise<void>;
   manageBilling(): Promise<void>;
   claimRoom(roomId: string, hostToken: string): Promise<boolean>;
   updateRoom(roomId: string, input: UpdateAccountRoomRequest): Promise<AccountRoomSummary | null>;
@@ -139,6 +140,18 @@ export function useAccount(): AccountModel {
     }
   }, [client]);
 
+  const changePlan = useCallback(async (plan: PaidAccountPlan) => {
+    setBusy("plan-change");
+    setError("");
+    try {
+      window.location.assign(await client.startPlanChange(plan));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The plan change could not be started.");
+    } finally {
+      setBusy(null);
+    }
+  }, [client]);
+
   const claimRoom = useCallback(async (roomId: string, hostToken: string) => {
     setBusy("claim");
     setError("");
@@ -212,6 +225,7 @@ export function useAccount(): AccountModel {
     signIn,
     signOut,
     subscribe,
+    changePlan,
     manageBilling,
     claimRoom,
     updateRoom,

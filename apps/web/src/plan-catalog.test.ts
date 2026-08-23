@@ -21,7 +21,7 @@ describe("public plan catalog", () => {
       price: plan.priceLabel,
       storage: plan.recordingStorage,
     }))).toEqual([
-      { cadence: "/ month", guests: "Up to 4 guests", name: "Podcaster", price: "$9.99", storage: "10 hours / month" },
+      { cadence: "/ month", guests: "Up to 4 guests", name: "Porchcaster", price: "$9.99", storage: "10 hours / month" },
       { cadence: "/ month", guests: "Up to 8 guests", name: "Showrunner", price: "$24.99", storage: "30 hours / month" },
       { cadence: "/ month", guests: "Up to 12 guests", name: "Studio", price: "$49.99", storage: "Unlimited recording hours" },
     ]);

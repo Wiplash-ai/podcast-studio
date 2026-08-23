@@ -1,7 +1,7 @@
 {
   "name": "podcast-studio-web",
   "version": "0.1.0",
-  "description": "The public browser application for Wiplash Podcast Studio.",
+  "description": "The public browser application for Wiplash Porchcast.",
   "private": true,
   "type": "module",
   "workspaces": [

@@ -58,7 +58,7 @@ const accountRoom = {
   openPath: "/?room=9f394f30-43cc-4dce-babf-8dfba0529967",
 } satisfies AccountRoomSummary;
 
-describe("Podcast Studio account client", () => {
+describe("Porchcast account client", () => {
   it("uses the in-memory account CSRF value for tokenless owned-room requests", () => {
     expect(roomRequestHeaders("", "account-csrf", { Accept: "application/json" })).toEqual({
       Accept: "application/json",
@@ -80,7 +80,7 @@ describe("Podcast Studio account client", () => {
     const client = createAccountClient(fetcher);
 
     await client.getSnapshot();
-    await client.signOut("https://labs.wiplash.ai/podcast-studio/");
+    await client.signOut("https://labs.wiplash.ai/porchcast/");
 
     const first = fetcher.mock.calls[0]![1]!;
     const second = fetcher.mock.calls[1]![1]!;
@@ -126,7 +126,9 @@ describe("Podcast Studio account client", () => {
 
   it("loads server-owned billing state and starts Stripe-hosted flows with CSRF and idempotency", async () => {
     const billing = {
+      mode: "test",
       plan: "free",
+      subscriptionPlan: null,
       status: "active",
       currentPeriodEnd: null,
       cancelAt: null,
@@ -146,6 +148,7 @@ describe("Podcast Studio account client", () => {
         },
       },
       checkoutAvailable: true,
+      planChangeAvailable: false,
       portalAvailable: true,
     };
     const fetcher = vi.fn<typeof fetch>()
@@ -158,6 +161,10 @@ describe("Podcast Studio account client", () => {
       .mockResolvedValueOnce(Response.json({
         status: "redirect",
         url: "https://billing.stripe.com/p/session/test_safe",
+      }))
+      .mockResolvedValueOnce(Response.json({
+        status: "redirect",
+        url: "https://billing.stripe.com/p/session/test_plan_change",
       }));
     const client = createAccountClient(fetcher);
 
@@ -165,11 +172,15 @@ describe("Podcast Studio account client", () => {
     expect((await client.getBilling()).plan).toBe("free");
     expect(await client.startCheckout("professional")).toContain("checkout.stripe.com");
     expect(await client.openBillingPortal()).toContain("billing.stripe.com");
+    expect(await client.startPlanChange("creator")).toContain("billing.stripe.com");
 
     const checkout = fetcher.mock.calls[2]![1]!;
     const portal = fetcher.mock.calls[3]![1]!;
+    const planChange = fetcher.mock.calls[4]![1]!;
     expect(JSON.parse(String(checkout.body))).toEqual({ plan: "professional" });
-    for (const request of [checkout, portal]) {
+    expect(JSON.parse(String(planChange.body))).toEqual({ plan: "creator" });
+    expect(String(fetcher.mock.calls[4]?.[0])).toContain("/v1/account/billing/plan-change");
+    for (const request of [checkout, portal, planChange]) {
       const headers = new Headers(request.headers);
       expect(headers.get("x-podcast-studio-csrf")).toBe("c".repeat(43));
       expect(headers.get("idempotency-key")).toMatch(/^[0-9a-f-]{36}$/);
@@ -255,17 +266,17 @@ describe("Podcast Studio account client", () => {
     }));
     const client = createAccountClient(fetcher);
     const authorization = await client.startSignIn(
-      "https://labs.wiplash.ai/podcast-studio/?room=one#private-state",
+      "https://labs.wiplash.ai/porchcast/?room=one#private-state",
     );
 
     expect(authorization).toContain("auth.wiplash.ai");
     const body = JSON.parse(String(fetcher.mock.calls[0]![1]?.body));
     expect(body).toEqual({
       provider: "wiplash",
-      returnUrl: "https://labs.wiplash.ai/podcast-studio/?room=one",
+      returnUrl: "https://labs.wiplash.ai/porchcast/?room=one",
     });
-    expect(accountReturnUrl("https://labs.wiplash.ai/podcast-studio/#state"))
-      .toBe("https://labs.wiplash.ai/podcast-studio/");
+    expect(accountReturnUrl("https://labs.wiplash.ai/porchcast/#state"))
+      .toBe("https://labs.wiplash.ai/porchcast/");
   });
 
   it("remembers a same-tab room return long enough to restore device setup", () => {
@@ -275,13 +286,13 @@ describe("Podcast Studio account client", () => {
       removeItem: (key: string) => values.delete(key),
       setItem: (key: string, value: string) => values.set(key, value),
     };
-    const roomUrl = "https://labs.wiplash.ai/podcast-studio/?room=weekly#private";
+    const roomUrl = "https://labs.wiplash.ai/porchcast/?room=weekly#private";
 
     rememberAccountSignInRedirect(storage, roomUrl, 1_000);
 
     expect(consumeAccountSignInRedirect(
       storage,
-      "https://labs.wiplash.ai/podcast-studio/?room=weekly",
+      "https://labs.wiplash.ai/porchcast/?room=weekly",
       2_000,
     )).toBe(true);
     expect(consumeAccountSignInRedirect(storage, roomUrl, 2_000)).toBe(false);
@@ -294,12 +305,12 @@ describe("Podcast Studio account client", () => {
       removeItem: (key: string) => values.delete(key),
       setItem: (key: string, value: string) => values.set(key, value),
     };
-    const roomUrl = "https://labs.wiplash.ai/podcast-studio/?room=weekly";
+    const roomUrl = "https://labs.wiplash.ai/porchcast/?room=weekly";
 
     rememberAccountSignInRedirect(storage, roomUrl, 1_000);
     expect(consumeAccountSignInRedirect(
       storage,
-      "https://labs.wiplash.ai/podcast-studio/?room=different",
+      "https://labs.wiplash.ai/porchcast/?room=different",
       2_000,
     )).toBe(false);
 

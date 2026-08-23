@@ -22,7 +22,7 @@ function endpoint(sourceId: string, operation: "whip" | "whep") {
   };
 }
 
-describe("browser-safe Podcast Studio contracts", () => {
+describe("browser-safe Porchcast contracts", () => {
   it("publishes the bounded browser room capacities", () => {
     expect(FREE_ROOM_GUEST_LIMIT).toBe(2);
     expect(STUDIO_ROOM_GUEST_LIMIT).toBe(12);

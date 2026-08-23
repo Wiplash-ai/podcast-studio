@@ -19,6 +19,8 @@
 
 .pricing-availability-note { width: max-content; max-width: 100%; margin-top: 34px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; color: #e0d5f4; background: rgba(124, 58, 237, .1); border: 1px solid rgba(167, 139, 250, .24); border-radius: 999px; font-size: 16px; line-height: 1.45; }
 .pricing-availability-note i { width: 9px; height: 9px; flex: none; background: #a78bfa; border-radius: 50%; box-shadow: 0 0 0 5px rgba(139, 92, 246, .12); }
+.pricing-test-note { width: max-content; max-width: 100%; margin-top: 12px; padding: 13px 17px; display: flex; align-items: center; gap: 10px; color: #d7f7e9; background: rgba(16, 185, 129, .08); border: 1px solid rgba(110, 231, 183, .2); border-radius: 14px; font-size: 14px; line-height: 1.45; }
+.pricing-test-note strong { color: #6ee7b7; }
 
 .pricing-access-note { width: min(1180px, calc(100% - 48px)); margin: 0 auto 24px; padding: 24px 26px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; }
 .pricing-access-note > span { color: #b9a1fb; font: 500 12px var(--mono); letter-spacing: .13em; }
@@ -31,6 +33,7 @@
 .pricing-grid > article { min-width: 0; padding: 29px 25px 25px; position: relative; display: flex; flex-direction: column; color: #eae5ef; background: rgba(20, 17, 24, .94); border: 1px solid rgba(255,255,255,.1); border-radius: 22px; box-shadow: 0 25px 70px rgba(0,0,0,.2); }
 .pricing-grid article > header { min-height: 88px; padding-bottom: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
 .pricing-grid article > header h2 { margin: 0; font-size: 32px; letter-spacing: -.045em; }
+.plan-current-label { width: max-content; margin-top: 7px; padding: 4px 7px; display: block; color: #c4b5fd; background: rgba(124,58,237,.12); border: 1px solid rgba(167,139,250,.2); border-radius: 999px; font: 600 9px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 .plan-price { min-width: 90px; display: grid; justify-items: end; gap: 2px; text-align: right; }
 .plan-price strong { color: #e2d6ff; font-size: 24px; line-height: 1; letter-spacing: -.04em; }
 .plan-price span { color: #81778a; font: 10px var(--mono); letter-spacing: .05em; text-transform: uppercase; }
@@ -95,6 +98,11 @@
 .marketing-footer > small { grid-column: 1 / -1; font-size: 12px; }
 
 .account-plan-link { min-height: 38px; margin-top: 10px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; color: #c4b5fd; background: rgba(124,58,237,.08); border: 1px solid rgba(167,139,250,.18); border-radius: 10px; font-size: 11px; font-weight: 750; text-decoration: none; }
+.account-billing-summary { margin: 10px 0 0; padding: 10px 12px; display: grid; gap: 2px; color: #d8d0df; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; }
+.account-billing-summary strong { font-size: 12px; }
+.account-billing-summary span { color: #9f97a7; font-size: 11px; }
+.account-billing-summary.test { border-color: rgba(110,231,183,.18); }
+.account-billing-summary.test span { color: #6ee7b7; }
 .account-plan-link:hover { color: #fff; background: rgba(124,58,237,.16); }
 .account-plan-link span:last-child { font-size: 15px; }
 .wizard-account-upgrade { color: #c4b5fd; text-underline-offset: 2px; }

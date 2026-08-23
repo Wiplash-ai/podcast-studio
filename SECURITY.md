@@ -1,6 +1,6 @@
 # Security policy
 
-Podcast Studio handles private audio, video, identity, and room capabilities.
+Porchcast handles private audio, video, identity, and room capabilities.
 
 Report suspected vulnerabilities privately through GitHub's security advisory
 feature for this repository. Do not include credentials, private room links,

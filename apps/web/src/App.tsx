@@ -61,6 +61,7 @@ import {
   apiUrl,
   appPagePath,
   appPath,
+  extensionDestination,
   invitationUrl,
   publicAppPageFromPath,
   type PublicAppPage,
@@ -481,9 +482,9 @@ function AppHeader({
     <header className="topbar">
       <button className="wordmark" onClick={onHome} type="button">
         <span className="wordmark-mark" aria-hidden="true">
-          <i /><i /><i />
+          <img alt="" src={`${appPath()}porchcast-mark.svg`} />
         </span>
-        <span>PODCAST STUDIO</span>
+        <span>Porchcast</span>
       </button>
       {mode === "home" ? (
         <nav className="landing-nav" aria-label="Product navigation">
@@ -512,7 +513,7 @@ function AppHeader({
           type="button"
         ><StudioIcon name="bookmark" /><span>{roomSaveLabel}</span>{roomSaveState === "saved" ? <i aria-hidden="true">✓</i> : null}</button> : null}
         <button
-          aria-label={account.snapshot.account ? "Open your Podcast Studio account" : "Sign in with Wiplash.ai"}
+          aria-label={account.snapshot.account ? "Open your Porchcast account" : "Sign in with Wiplash.ai"}
           className={`account-trigger ${account.snapshot.account ? "signed-in" : ""}`}
           onClick={onAccount}
           type="button"
@@ -570,7 +571,7 @@ function LandingView({
             <span>Skip the production rig.</span>
           </h1>
           <p className="landing-lede">
-            Invite your guest, talk face to face, and control the recording yourself. Podcast Studio moves the heavy media work to the Cloud.
+            Invite your guest, talk face to face, and control the recording yourself. Porchcast moves the heavy media work to the Cloud.
           </p>
           <div className="landing-actions">
             <button className="hero-primary" onClick={onBook} type="button">Book a room <span aria-hidden="true">→</span></button>
@@ -582,7 +583,7 @@ function LandingView({
             <span><i /> Secure source recordings</span>
           </div>
         </div>
-        <div className="landing-product" id="studio-preview" aria-label="Podcast Studio room experience">
+        <div className="landing-product" id="studio-preview" aria-label="Porchcast room experience">
           <div className="product-room-heading"><span>Rooms / Host</span><strong>The Midnight Show</strong></div>
           <div className="product-window">
             <div className="product-stage">
@@ -614,7 +615,7 @@ function LandingView({
         <div className="cloud-story-copy">
           <p className="eyebrow">Why it records in parts</p>
           <h2>A long episode shouldn’t depend on one giant file.</h2>
-          <p>Podcast Studio safely closes short source sections as you go. If a connection drops or the last file is damaged, the rest of the episode stays intact. Those parts remain your secure source recordings; Desktop and Mobile views are prepared separately.</p>
+          <p>Porchcast safely closes short source sections as you go. If a connection drops or the last file is damaged, the rest of the episode stays intact. Those parts remain your secure source recordings; Desktop and Mobile views are prepared separately.</p>
           <div className="cloud-story-use-cases" aria-label="Supported recording types">
             <span>Solo episodes</span><span>Guest interviews</span><span>Screen sharing</span>
           </div>
@@ -660,6 +661,15 @@ function LandingView({
           <li><span>2</span><div><strong>Send one private link</strong><p>Each person chooses a camera and microphone once, gives consent, and joins the conversation.</p></div></li>
           <li><span>3</span><div><strong>Record it yourself</strong><p>The host starts and stops the Cloud recording—no agent required. Downloads stay attached to the room.</p></div></li>
         </ol>
+      </section>
+
+      <section className="landing-extension" id="extension">
+        <img alt="" src={`${appPath()}porchcast-mark.svg`} />
+        <div>
+          <p className="eyebrow">Porchcast browser companion</p>
+          <h2>Know when the final cut is ready.</h2>
+          <p>Keep a movable Porchcast widget close in any tab, return to recent Porches, and get an alert when your Desktop and Mobile recordings finish preparing.</p>
+        </div>
       </section>
 
       <section className="landing-final-cta">
@@ -752,7 +762,7 @@ function BookingView({
       if (event.target === event.currentTarget) onClose();
     }}>
       <form
-        aria-label="Book a Podcast Studio room"
+        aria-label="Book a Porchcast room"
         aria-modal="true"
         className="booking-workspace booking-wizard booking-modal"
         onSubmit={(event) => void submit(event)}
@@ -2076,6 +2086,16 @@ function StudioView({
           <p className="eyebrow">Rooms / {isHost ? "Host" : "Guest"}</p>
           <h1>{title}</h1>
         </div>
+        <a
+          className="extension-callout"
+          href={extensionDestination()}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <img alt="" src={`${appPath()}porchcast-mark.svg`} />
+          <span><strong>Get the browser companion</strong><small>Porch shortcuts + recording-ready alerts</small></span>
+          <i aria-hidden="true">&#8599;</i>
+        </a>
       </section>
 
       <section className={`studio-workspace ${chatOpen ? "chat-open" : ""} ${chatExpanded ? "chat-expanded" : ""}`}>
@@ -2612,7 +2632,7 @@ function StudioView({
                     <i aria-hidden="true" />
                   </summary>
                   <p>
-                    Podcast Studio saves cameras and screens in short parts so a disconnect cannot destroy the entire recording. These are editing and recovery sources—not generated clips.
+                    Porchcast saves cameras and screens in short parts so a disconnect cannot destroy the entire recording. These are editing and recovery sources—not generated clips.
                   </p>
                   {sourceArtifactGroups.map((group) => (
                     <section className="source-recording-group" key={group.key}>
@@ -2678,7 +2698,7 @@ function RoomExitView({
   return (
     <main className="room-exit-main">
       <section className="room-exit-card">
-        <span className="room-exit-mark" aria-hidden="true"><i /><i /><i /></span>
+        <span className="room-exit-mark" aria-hidden="true"><img alt="" src={`${appPath()}porchcast-mark.svg`} /></span>
         <p className="eyebrow">CALL ENDED</p>
         <h1>You left {room.title}</h1>
         <p>
@@ -2861,18 +2881,18 @@ export function App() {
   useEffect(() => {
     const roomTitle = access?.room.title ?? importedRoom?.roomName;
     document.title = roomTitle
-      ? `${roomTitle} | Podcast Studio`
+      ? `${roomTitle} | Porchcast`
       : publicPage === "pricing"
-        ? "Pricing | Podcast Studio"
+        ? "Pricing | Porchcast"
         : publicPage === "privacy"
-          ? "Privacy | Podcast Studio"
-          : "Podcast Studio";
+          ? "Privacy | Porchcast"
+          : "Porchcast";
     const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (description && !roomTitle) {
       description.content = publicPage === "pricing"
-        ? "Compare Podcast Studio plans for room capacity, guest seats, and Cloud recording history."
+        ? "Compare Porchcast plans for room capacity, guest seats, and Cloud recording history."
         : publicPage === "privacy"
-          ? "Learn how Podcast Studio handles participant consent, live media, Cloud recordings, account data, retention, and downloads."
+          ? "Learn how Porchcast handles participant consent, live media, Cloud recordings, account data, retention, and downloads."
           : "Record remote podcasts in the Cloud with host-controlled rooms, secure sources, and Desktop and Mobile views.";
     }
   }, [access?.room.title, importedRoom?.roomName, publicPage]);
@@ -3264,7 +3284,7 @@ export function App() {
             ? "Cloud recording is active. Stop & save before leaving so the recording can finalize safely."
             : pendingNavigation === "booking"
               ? "This room view will close when you start booking a new room. Are you sure you want to continue?"
-              : "This room view will close and you’ll return to the Podcast Studio home page."}</p>
+              : "This room view will close and you’ll return to the Porchcast home page."}</p>
           <div><button onClick={() => setPendingNavigation(null)} type="button">Stay here</button><button className="danger-action" disabled={recordingActive} onClick={() => {
             const target = pendingNavigation;
             setPendingNavigation(null);

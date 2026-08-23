@@ -28,7 +28,7 @@ export class ApplicationErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error("Podcast Studio recovered a browser rendering failure.", error, info);
+    console.error("Porchcast recovered a browser rendering failure.", error, info);
   }
 
   render(): ReactNode {
@@ -39,10 +39,10 @@ export class ApplicationErrorBoundary extends Component<
           <span>Your recording remains in the Cloud</span>
           <h1>The room display needs a refresh.</h1>
           <p>
-            Podcast Studio preserved your room and recording state. Reload this page to reconnect
+            Porchcast preserved your room and recording state. Reload this page to reconnect
             the display and continue checking your downloads.
           </p>
-          <button onClick={() => window.location.reload()} type="button">Reload Podcast Studio</button>
+          <button onClick={() => window.location.reload()} type="button">Reload Porchcast</button>
         </section>
       </main>
     );

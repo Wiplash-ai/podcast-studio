@@ -1,6 +1,6 @@
-# Podcast Studio
+# Porchcast
 
-Podcast Studio is the public browser application for Wiplash's Cloud-recorded
+Porchcast is the public browser application for Wiplash's Cloud-recorded
 remote podcast rooms. Each participant chooses a camera and microphone once,
 publishes once, talks with the room, and leaves the heavy recording work to the
 private service plane.

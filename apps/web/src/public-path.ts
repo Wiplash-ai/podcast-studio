@@ -1,4 +1,5 @@
 const configuredApiBase = (import.meta.env.VITE_API_URL as string | undefined)?.trim() ?? "";
+const configuredExtensionUrl = (import.meta.env.VITE_EXTENSION_URL as string | undefined)?.trim() ?? "";
 
 export const API_BASE = configuredApiBase.replace(/\/$/, "");
 
@@ -27,6 +28,13 @@ export function appPath(search = "", base = import.meta.env.BASE_URL || "/"): st
   return `${normalizedBase}${search}`;
 }
 
+export function extensionDestination(
+  extensionUrl = configuredExtensionUrl,
+  base = import.meta.env.BASE_URL || "/",
+): string {
+  return extensionUrl.trim() || appPath("#extension", base);
+}
+
 export function appPagePath(
   page: PublicAppPage,
   base = import.meta.env.BASE_URL || "/",
@@ -39,7 +47,7 @@ export function publicAppPageFromPath(
   pathname: string,
   base = import.meta.env.BASE_URL || "/",
 ): PublicAppPage {
-  const basePath = normalizedAppBase(new URL(base, "https://podcast-studio.invalid").pathname);
+  const basePath = normalizedAppBase(new URL(base, "https://porchcast.invalid").pathname);
   const normalizedPath = pathname.endsWith("/") && pathname !== "/"
     ? pathname.slice(0, -1)
     : pathname;

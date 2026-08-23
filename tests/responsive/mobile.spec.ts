@@ -55,12 +55,12 @@ async function renderRoomFixture(page: Page, options: { participantCount: number
       <div id="root">
         <div class="app-shell">
           <header class="topbar">
-            <button class="wordmark"><span class="wordmark-mark"><i></i><i></i><i></i></span><span>PODCAST STUDIO</span></button>
+            <button class="wordmark"><span class="wordmark-mark"><img alt="" src="/porchcast-mark.svg"></span><span>Porchcast</span></button>
             <div class="app-breadcrumb"><span>Rooms</span><i>/</i><strong>Responsive room</strong></div>
             <div class="topbar-actions"><button class="new-room-button">Book a room</button></div>
           </header>
           <main class="studio-main">
-            <section class="studio-header"><div><p class="eyebrow">Cloud room</p><h1>Responsive room</h1></div></section>
+            <section class="studio-header"><div><p class="eyebrow">Cloud room</p><h1>Responsive room</h1></div><a class="extension-callout" href="#extension"><img alt="" src="/porchcast-mark.svg"><span><strong>Get the browser companion</strong><small>Porch shortcuts + recording-ready alerts</small></span><i>↗</i></a></section>
             <section class="studio-workspace">
               <div class="stage-column">
                 <div class="stage-frame">
@@ -91,7 +91,7 @@ async function renderPreflightFixture(page: Page) {
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="root"><div class="app-shell">
-        <header class="topbar"><button class="wordmark"><span class="wordmark-mark"><i></i><i></i><i></i></span><span>PODCAST STUDIO</span></button><div class="topbar-actions"><button class="new-room-button">Book a room</button></div></header>
+        <header class="topbar"><button class="wordmark"><span class="wordmark-mark"><img alt="" src="/porchcast-mark.svg"></span><span>Porchcast</span></button><div class="topbar-actions"><button class="new-room-button">Book a room</button></div></header>
         <main class="studio-main">
           <section class="studio-header"><div><p class="eyebrow">Cloud room</p><h1>Device setup</h1></div></section>
           <section class="studio-workspace"><div class="stage-column"><div class="stage-frame">
@@ -128,7 +128,7 @@ for (const viewport of [
     await expectInsideViewport(page, ".landing-product");
 
     await page.getByRole("button", { name: /Book a room/i }).first().click();
-    const dialog = page.getByRole("dialog", { name: "Book a Podcast Studio room" });
+    const dialog = page.getByRole("dialog", { name: "Book a Porchcast room" });
     await expect(dialog).toBeVisible();
     await expectInsideViewport(page, ".booking-modal");
     await expectNoHorizontalOverflow(page);
@@ -155,6 +155,7 @@ test("a thirteen-person portrait room uses readable stacked cards", async ({ pag
   await renderRoomFixture(page, { participantCount: 13 });
   await expectNoHorizontalOverflow(page);
   await expectInsideViewport(page, ".stage-controls-overlay");
+  await expectInsideViewport(page, ".extension-callout");
 
   const gallery = page.locator(".participant-grid");
   const firstTile = gallery.locator(".participant-tile").first();

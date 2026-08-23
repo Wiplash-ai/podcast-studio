@@ -1,6 +1,7 @@
 import type { MouseEvent } from "react";
 
 import { podcastPlans, pricingQuestions } from "./plan-catalog";
+import { pricingAction } from "./pricing-action";
 import { appPagePath, type PublicAppPage } from "./public-path";
 import type { AccountModel } from "./use-account";
 
@@ -17,12 +18,12 @@ function MarketingFooter({ onNavigate }: { onNavigate: (page: PublicAppPage) => 
 
   return (
     <footer className="marketing-footer">
-      <div><strong>Podcast Studio</strong><span>Cloud recording for conversations worth keeping.</span></div>
+      <div><strong>Porchcast</strong><span>Cloud recording for conversations worth keeping.</span></div>
       <nav aria-label="Legal and product links">
         <a {...publicLink("home")}>Product</a>
         <a {...publicLink("pricing")}>Pricing</a>
         <a {...publicLink("privacy")}>Privacy</a>
-        <a href="mailto:support@wiplash.ai?subject=Podcast%20Studio%20Support">Support</a>
+        <a href="mailto:support@wiplash.ai?subject=Porchcast%20Support">Support</a>
       </nav>
       <small>© {new Date().getFullYear()} Wiplash.ai</small>
     </footer>
@@ -45,10 +46,11 @@ export function PricingView({
   return (
     <main className="marketing-main pricing-page">
       <section className="marketing-hero pricing-hero">
-        <p className="eyebrow">Podcast Studio plans</p>
+        <p className="eyebrow">Porchcast plans</p>
         <h1>Start free.<br /><span>Grow when your show does.</span></h1>
         <p>Every plan moves the recording work to the Cloud and delivers the same quality. Choose the number of guests and monthly recording hours that fit your show.</p>
         <div className="pricing-availability-note" role="note"><i /> Paid plans are monthly subscriptions. Stripe will securely process payments.</div>
+        {account.billing?.mode === "test" ? <div className="pricing-test-note" role="status"><strong>Stripe test mode</strong><span>This account is testing subscriptions. No real payment is collected.</span></div> : null}
       </section>
 
       <section className="pricing-access-note" aria-label="Access without an account">
@@ -57,31 +59,35 @@ export function PricingView({
         <button onClick={onBook} type="button">Book a room <span aria-hidden="true">→</span></button>
       </section>
 
-      <section className="pricing-grid" aria-label="Podcast Studio plans">
+      <section className="pricing-grid" aria-label="Porchcast plans">
         {podcastPlans.map((plan) => {
-          const isCurrent = account.billing?.plan === plan.id;
-          const paidPlan = plan.id === "free" ? null : plan.id;
-          const isPaid = paidPlan !== null;
+          const action = pricingAction(plan.id, account.billing, Boolean(account.snapshot.account));
+          const isCurrentSubscription = account.billing?.subscriptionPlan === plan.id;
+          const isInternalStudio = account.billing?.plan === "internal" && plan.id === "studio";
+          const actionClass = `plan-action${plan.id === "free" ? "" : " secondary"}`;
+          const actionControl = action.kind === "book" ? (
+            <button className={actionClass} onClick={onBook} type="button">{action.label}</button>
+          ) : action.kind === "sign-in" ? (
+            <button className={actionClass} disabled={Boolean(account.busy)} onClick={() => void account.signIn()} type="button">{account.busy === "sign-in" ? "Opening sign-in…" : action.label}</button>
+          ) : action.kind === "checkout" ? (
+            <button className={actionClass} disabled={Boolean(account.busy)} onClick={() => void account.subscribe(action.plan)} type="button">{account.busy === "checkout" ? "Opening secure checkout…" : action.label}</button>
+          ) : action.kind === "plan-change" ? (
+            <button className={actionClass} disabled={Boolean(account.busy)} onClick={() => void account.changePlan(action.plan)} type="button">{account.busy === "plan-change" ? "Opening plan details…" : action.label}</button>
+          ) : action.kind === "manage" ? (
+            <button className={actionClass} disabled={Boolean(account.busy)} onClick={() => void account.manageBilling()} type="button">{account.busy === "portal" ? "Opening billing…" : action.label}</button>
+          ) : (
+            <span className={`${actionClass} unavailable`}>{action.label}</span>
+          );
           return (
           <article key={plan.id}>
             <header>
-              <div><h2>{plan.name}</h2></div>
+              <div><h2>{plan.name}</h2>{isCurrentSubscription ? <span className="plan-current-label">Current subscription</span> : isInternalStudio ? <span className="plan-current-label">Admin access</span> : null}</div>
               <div className="plan-price"><strong>{plan.priceLabel}</strong><span>{plan.priceCadence}</span></div>
             </header>
             <p>{plan.summary}</p>
             <dl><div><dt>Guests</dt><dd>{plan.guests}</dd></div><div><dt>Cloud recording</dt><dd>{plan.recordingStorage}</dd></div><div><dt>Quality</dt><dd>{plan.quality}</dd></div></dl>
             <ul>{plan.features.map((feature) => <li key={feature}><i />{feature}</li>)}</ul>
-            {!isPaid ? (
-              <button className="plan-action" onClick={onBook} type="button">{isCurrent ? "Book with Free" : "Book a free room"}</button>
-            ) : isCurrent && account.billing?.portalAvailable ? (
-              <button className="plan-action secondary" disabled={Boolean(account.busy)} onClick={() => void account.manageBilling()} type="button">{account.busy === "portal" ? "Opening billing…" : "Manage subscription"}</button>
-            ) : !account.snapshot.account ? (
-              <button className="plan-action secondary" disabled={Boolean(account.busy)} onClick={() => void account.signIn()} type="button">{account.busy === "sign-in" ? "Opening sign-in…" : `Sign in for ${plan.name}`}</button>
-            ) : account.billing?.checkoutAvailable && paidPlan ? (
-              <button className="plan-action secondary" disabled={Boolean(account.busy)} onClick={() => void account.subscribe(paidPlan)} type="button">{account.busy === "checkout" ? "Opening secure checkout…" : `Choose ${plan.name}`}</button>
-            ) : (
-              <span className="plan-action secondary unavailable">Subscriptions opening soon</span>
-            )}
+            {actionControl}
           </article>
         );})}
       </section>
@@ -109,7 +115,7 @@ export function PricingView({
 const policySections = [
   {
     title: "Who we are and what this covers",
-    body: <><p>This policy covers Podcast Studio at Wiplash Labs, including booked rooms, participant media, Cloud recordings, chat, downloads, and Podcast Studio account features. Podcast Studio is operated by Westward Envoy Technologies LLC, doing business as Wiplash.ai (“Wiplash,” “we,” “us,” or “our”).</p><p>The broader <a href="https://wiplash.ai/legal/privacy">Wiplash.ai Privacy Policy</a> also applies. If the policies conflict about Podcast Studio data, this product-specific policy controls.</p></>,
+    body: <><p>This policy covers Porchcast at Wiplash Labs, including booked rooms, participant media, Cloud recordings, chat, downloads, and Porchcast account features. Porchcast is operated by Westward Envoy Technologies LLC, doing business as Wiplash.ai (“Wiplash,” “we,” “us,” or “our”).</p><p>The broader <a href="https://wiplash.ai/legal/privacy">Wiplash.ai Privacy Policy</a> also applies. If the policies conflict about Porchcast data, this product-specific policy controls.</p></>,
   },
   {
     title: "Information we collect",
@@ -133,7 +139,7 @@ const policySections = [
   },
   {
     title: "Payments",
-    body: <p>Paid Podcast Studio memberships are not available as of this policy’s effective date. We expect to use Stripe to process future payments. Before paid memberships become available, we will update this policy and the checkout notice to explain the payment identifiers, subscription details, tax information, retention, and other data Stripe processes. We do not expect to receive your complete payment-card number.</p>,
+    body: <p>Paid Porchcast memberships are not available as of this policy’s effective date. We expect to use Stripe to process future payments. Before paid memberships become available, we will update this policy and the checkout notice to explain the payment identifiers, subscription details, tax information, retention, and other data Stripe processes. We do not expect to receive your complete payment-card number.</p>,
   },
   {
     title: "International transfers",
@@ -149,19 +155,19 @@ const policySections = [
   },
   {
     title: "Cookies and browser storage",
-    body: <p>Signed-in accounts use secure HTTP-only cookies for Wiplash sign-in, session, and logout state. The application uses browser session or local storage for scoped room and participant capabilities, invitation recovery, local viewing preferences, and room continuity. Media capabilities are kept in memory and are not placed in URLs or persistent browser storage. Podcast Studio does not currently load advertising trackers.</p>,
+    body: <p>Signed-in accounts use secure HTTP-only cookies for Wiplash sign-in, session, and logout state. The application uses browser session or local storage for scoped room and participant capabilities, invitation recovery, local viewing preferences, and room continuity. Media capabilities are kept in memory and are not placed in URLs or persistent browser storage. Porchcast does not currently load advertising trackers.</p>,
   },
   {
     title: "Security",
-    body: <p>We use encrypted transport, scoped and hashed capabilities, server-derived media identities, consent checks, account authorization, restricted downloads, retention receipts, and isolated media infrastructure. No online service is perfectly secure. Keep invitation links private, use host admission when appropriate, and report suspected security issues to <a href="mailto:support@wiplash.ai?subject=Podcast%20Studio%20Security">support@wiplash.ai</a>.</p>,
+    body: <p>We use encrypted transport, scoped and hashed capabilities, server-derived media identities, consent checks, account authorization, restricted downloads, retention receipts, and isolated media infrastructure. No online service is perfectly secure. Keep invitation links private, use host admission when appropriate, and report suspected security issues to <a href="mailto:support@wiplash.ai?subject=Porchcast%20Security">support@wiplash.ai</a>.</p>,
   },
   {
     title: "Children’s privacy",
-    body: <p>Podcast Studio is not directed to children under 13 and is not designed for school or parental-consent workflows. Do not use the service to record a child unless you have the authority and consent required by applicable law. Contact us if you believe a child provided personal information without proper authorization.</p>,
+    body: <p>Porchcast is not directed to children under 13 and is not designed for school or parental-consent workflows. Do not use the service to record a child unless you have the authority and consent required by applicable law. Contact us if you believe a child provided personal information without proper authorization.</p>,
   },
   {
     title: "Contact and rights requests",
-    body: <p>Email privacy requests to <a href="mailto:support@wiplash.ai?subject=Podcast%20Studio%20Privacy%20Request">support@wiplash.ai</a> and legal notices to <a href="mailto:legal@wiplash.ai?subject=Podcast%20Studio">legal@wiplash.ai</a>. Include “Podcast Studio” in the subject and do not send passwords, room capabilities, or private recordings unless we ask for a secure transfer. We will respond within the period required by applicable law.</p>,
+    body: <p>Email privacy requests to <a href="mailto:support@wiplash.ai?subject=Porchcast%20Privacy%20Request">support@wiplash.ai</a> and legal notices to <a href="mailto:legal@wiplash.ai?subject=Porchcast">legal@wiplash.ai</a>. Include “Porchcast” in the subject and do not send passwords, room capabilities, or private recordings unless we ask for a secure transfer. We will respond within the period required by applicable law.</p>,
   },
   {
     title: "Changes and additional terms",
@@ -173,9 +179,9 @@ export function PrivacyView({ onNavigate }: { onNavigate: (page: PublicAppPage) 
   return (
     <main className="marketing-main privacy-page">
       <section className="marketing-hero privacy-hero">
-        <p className="eyebrow">Podcast Studio privacy</p>
+        <p className="eyebrow">Porchcast privacy</p>
         <h1>Your conversation is the product.<br /><span>Not the raw material.</span></h1>
-        <p>This notice explains what Podcast Studio receives, why the Cloud needs it, who can access a recording, and when media is scheduled for deletion.</p>
+        <p>This notice explains what Porchcast receives, why the Cloud needs it, who can access a recording, and when media is scheduled for deletion.</p>
         <dl className="privacy-summary">
           <div><dt>Effective</dt><dd>August 17, 2026</dd></div>
           <div><dt>Operator</dt><dd>Westward Envoy Technologies LLC d/b/a Wiplash.ai</dd></div>

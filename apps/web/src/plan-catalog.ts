@@ -42,7 +42,7 @@ export const podcastPlans: PodcastPlan[] = [
   },
   {
     id: "creator",
-    name: "Podcaster",
+    name: "Porchcaster",
     status: "subscription",
     priceLabel: "$9.99",
     priceCadence: "/ month",
@@ -93,7 +93,7 @@ export const podcastPlans: PodcastPlan[] = [
 export const pricingQuestions: PricingQuestion[] = [
   {
     question: "Are the paid plans subscriptions?",
-    answer: "Yes. Podcaster, Showrunner, and Studio are monthly subscriptions that renew automatically until you cancel. Stripe will securely process subscription payments.",
+    answer: "Yes. Porchcaster, Showrunner, and Studio are monthly subscriptions that renew automatically until you cancel. Stripe will securely process subscription payments.",
   },
   {
     question: "Do Free recordings have lower quality?",
@@ -125,7 +125,7 @@ export const pricingQuestions: PricingQuestion[] = [
   },
   {
     question: "Does Wiplash store my card number?",
-    answer: "No. Stripe processes the payment details. Podcast Studio receives the billing status and identifiers needed to manage your subscription, not your complete card number.",
+    answer: "No. Stripe processes the payment details. Porchcast receives the billing status and identifiers needed to manage your subscription, not your complete card number.",
   },
 ];
 

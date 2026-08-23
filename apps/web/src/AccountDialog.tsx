@@ -9,7 +9,7 @@ import type {
 
 import type { AccountModel } from "./use-account";
 import { pricingQuery } from "./plan-catalog";
-import { appPagePath } from "./public-path";
+import { appPagePath, appPath } from "./public-path";
 import { recordingViewLabel } from "./studio-controls";
 
 function AccountIcon() {
@@ -47,11 +47,17 @@ function formatHours(seconds: number): string {
 }
 
 const accountPlanLabels = {
-  creator: "PODCASTER ACCOUNT",
+  creator: "PORCHCASTER ACCOUNT",
   free: "FREE ACCOUNT",
   internal: "INTERNAL ACCOUNT",
   professional: "SHOWRUNNER ACCOUNT",
   studio: "STUDIO ACCOUNT",
+} as const;
+
+const subscriptionPlanLabels = {
+  creator: "Porchcaster",
+  professional: "Showrunner",
+  studio: "Studio",
 } as const;
 
 const accountGuestSeatOptions = [
@@ -175,7 +181,7 @@ export function AccountDialog({
     }}>
       <section aria-labelledby="account-dialog-title" aria-modal="true" className="account-dialog" role="dialog">
         <header>
-          <div className="account-brand"><span><i /><i /><i /></span><div><strong>Podcast Studio</strong><small>One Wiplash identity, every app</small></div></div>
+          <div className="account-brand"><span className="account-brand-mark"><img alt="" src={`${appPath()}porchcast-mark.svg`} /></span><div><strong>Porchcast</strong><small>One Wiplash identity, every app</small></div></div>
           <button aria-label="Close account" disabled={Boolean(model.busy)} onClick={onClose} ref={closeButton} type="button">×</button>
         </header>
 
@@ -196,13 +202,18 @@ export function AccountDialog({
             </> : <p>{allowance ? "Recording time is not metered on this plan. Existing recordings are unchanged." : "Checking your recording allowance…"}</p>}
           </div>
           <div className="account-retention-note"><strong>Seven-day Cloud history</strong><span>Your rooms are reusable metadata. Recording time—not room count—is the Free plan allowance.</span></div>
-          {model.billing?.portalAvailable ? <button className="account-plan-link" disabled={Boolean(model.busy)} onClick={() => void model.manageBilling()} type="button"><span>{model.busy === "portal" ? "Opening secure billing…" : "Manage subscription and payment method"}</span><span aria-hidden="true">→</span></button> : <a className="account-plan-link" href={`${appPagePath("pricing")}${pricingQuery(allowance?.plan === "free" && allowance.remainingSeconds === 0 ? "recording_hours" : "account_plan")}`} rel="noreferrer" target="_blank"><span>{allowance?.plan === "free" && allowance.remainingSeconds === 0 ? "Compare plans for more recording time" : "Compare Podcast Studio plans"}</span><span aria-hidden="true">→</span></a>}
+          {model.billing?.plan === "internal" && !model.billing.subscriptionPlan ? (
+            <p className="account-billing-summary"><strong>Admin Studio access</strong><span>No paid subscription is required for this account.</span></p>
+          ) : model.billing?.subscriptionPlan ? (
+            <p className={`account-billing-summary ${model.billing.mode === "test" ? "test" : ""}`}><strong>{subscriptionPlanLabels[model.billing.subscriptionPlan]} subscription</strong><span>{model.billing.mode === "test" ? "Stripe test mode · no real payment" : "Managed securely in Stripe"}</span></p>
+          ) : null}
+          {model.billing?.portalAvailable ? <button className="account-plan-link" disabled={Boolean(model.busy)} onClick={() => void model.manageBilling()} type="button"><span>{model.busy === "portal" ? "Opening secure billing…" : "Manage subscription and payment method"}</span><span aria-hidden="true">→</span></button> : <a className="account-plan-link" href={`${appPagePath("pricing")}${pricingQuery(allowance?.plan === "free" && allowance.remainingSeconds === 0 ? "recording_hours" : "account_plan")}`} rel="noreferrer" target="_blank"><span>{allowance?.plan === "free" && allowance.remainingSeconds === 0 ? "Compare plans for more recording time" : "Compare Porchcast plans"}</span><span aria-hidden="true">→</span></a>}
           {currentRoom && !currentSaved && hostToken ? (
             <button className="save-current-room" disabled={Boolean(model.busy)} onClick={() => void model.claimRoom(currentRoom.id, hostToken)} type="button">
               <span><strong>Save this room</strong><small>Add “{currentRoom.title}” to your reusable rooms.</small></span><i>{model.busy === "claim" ? "Saving…" : "+"}</i>
             </button>
           ) : currentRoom && currentSaved ? <p className="room-saved-state"><i /> This room is saved to your account.</p> : null}
-          <section className="account-recording-library" aria-label="Your Podcast Studio recordings">
+          <section className="account-recording-library" aria-label="Your Porchcast recordings">
             <div className="account-library-heading"><span>YOUR RECORDINGS</span><strong>{model.recordingLibrary?.recordings.length ?? 0}</strong></div>
             {model.recordingLibrary?.recordings.length ? <ul>{model.recordingLibrary.recordings.map((entry) => (
               <li key={entry.recording.id}>
@@ -213,7 +224,7 @@ export function AccountDialog({
               </li>
             ))}</ul> : model.recordingLibrary ? <div className="account-recordings-empty"><strong>No recordings yet</strong><span>Your Cloud recordings will appear here after you press Record.</span></div> : <div className="account-recordings-empty"><strong>Loading recordings…</strong></div>}
           </section>
-          <section className="account-room-library" aria-label="Your Podcast Studio rooms">
+          <section className="account-room-library" aria-label="Your Porchcast rooms">
             <div><span>REUSABLE ROOMS</span><strong>{model.rooms.length}</strong></div>
             {editingRoom && draft ? <div className="account-room-editor">
               <div className="account-room-editor-heading"><span><small>ROOM SETTINGS</small><strong>Edit saved room</strong></span><button disabled={Boolean(model.busy)} onClick={closeRoomAction} type="button">Cancel</button></div>

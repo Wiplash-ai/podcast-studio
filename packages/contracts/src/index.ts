@@ -522,7 +522,9 @@ export const accountBillingStatusSchema = z.enum([
 ]);
 
 export const accountBillingSnapshotSchema = z.object({
+  mode: z.enum(["test", "live"]).nullable(),
   plan: accountPlanSchema,
+  subscriptionPlan: paidAccountPlanSchema.nullable(),
   status: accountBillingStatusSchema,
   currentPeriodEnd: z.string().datetime().nullable(),
   cancelAt: z.string().datetime().nullable(),
@@ -533,6 +535,7 @@ export const accountBillingSnapshotSchema = z.object({
     recording: accountRecordingAllowanceSchema,
   }),
   checkoutAvailable: z.boolean(),
+  planChangeAvailable: z.boolean(),
   portalAvailable: z.boolean(),
 }).superRefine((snapshot, context) => {
   if (snapshot.capabilities.recording.plan !== snapshot.plan) {

@@ -1017,7 +1017,7 @@ h1 { font-weight: 650; letter-spacing: -.045em; }
   .booking-wizard .wizard-step { animation: none; }
 }
 
-/* Podcast Studio experience: cinematic landing, modal booking, and unified room controls. */
+/* Porchcast experience: cinematic landing, modal booking, and unified room controls. */
 :root {
   --violet: #8b5cf6;
   --violet-bright: #a78bfa;
@@ -2004,4 +2004,97 @@ h1 { font-weight: 650; letter-spacing: -.045em; }
   .new-room-button::after { content: "+"; font-size: 23px; font-weight: 500; line-height: 1; }
   .room-save-trigger, .account-trigger { width: 44px; min-width: 44px; height: 44px; }
   .marketing-hero h1 { font-size: clamp(38px, 12vw, 52px); overflow-wrap: anywhere; }
+}
+
+/* Porch Cat identity and browser-companion surfaces. */
+.wordmark-mark {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  display: block;
+}
+.wordmark-mark img, .account-brand-mark img, .room-exit-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.account-brand > .account-brand-mark {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 13px;
+}
+.room-exit-mark {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 18px;
+}
+
+.extension-callout {
+  min-width: min(360px, 38vw);
+  min-height: 54px;
+  padding: 7px 10px 7px 8px;
+  display: grid;
+  grid-template-columns: 39px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: #e9e4f1;
+  background: linear-gradient(115deg, rgba(139,92,246,.16), rgba(255,255,255,.035));
+  border: 1px solid rgba(196,181,253,.2);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  text-decoration: none;
+}
+.extension-callout:hover {
+  color: #fff;
+  background: linear-gradient(115deg, rgba(139,92,246,.27), rgba(255,255,255,.06));
+  border-color: rgba(196,181,253,.4);
+  transform: translateY(-1px);
+}
+.extension-callout:focus-visible { outline: 3px solid rgba(167,139,250,.4); outline-offset: 2px; }
+.extension-callout > img { width: 39px; height: 39px; display: block; border-radius: 11px; }
+.extension-callout strong, .extension-callout small { display: block; }
+.extension-callout strong { font-size: 12px; line-height: 1.25; }
+.extension-callout small { margin-top: 3px; color: #9e96a7; font-size: 10px; line-height: 1.25; }
+.extension-callout > i { color: #c4b5fd; font-size: 15px; font-style: normal; }
+
+.landing-extension {
+  padding: clamp(70px, 9vw, 120px) max(28px, calc((100vw - 1100px) / 2));
+  display: grid;
+  grid-template-columns: clamp(86px, 10vw, 126px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 58px);
+  color: #f7f5ff;
+  background: radial-gradient(circle at 18% 50%, rgba(124,58,237,.22), transparent 28%), #100d14;
+  border-top: 1px solid rgba(196,181,253,.12);
+  border-bottom: 1px solid rgba(196,181,253,.12);
+}
+.landing-extension > img { width: 100%; aspect-ratio: 1; display: block; border-radius: 28%; box-shadow: 0 24px 70px rgba(91,33,182,.32); }
+.landing-extension h2 { max-width: 670px; margin: 0; font-size: clamp(36px, 4.4vw, 62px); line-height: 1.04; letter-spacing: -.055em; }
+.landing-extension div > p:last-child { max-width: 670px; margin: 18px 0 0; color: #bdb5c7; font-size: clamp(17px, 1.6vw, 20px); line-height: 1.65; }
+@media (max-width: 900px) {
+  .extension-callout { min-width: 54px; width: 54px; grid-template-columns: 1fr; padding: 7px; }
+  .extension-callout > span, .extension-callout > i { display: none; }
+  .extension-callout > img { width: 38px; height: 38px; }
+  .landing-extension { grid-template-columns: 90px minmax(0, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .studio-header { align-items: center; flex-direction: row; }
+  .studio-header > div { min-width: 0; }
+  .studio-header h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .extension-callout { flex: 0 0 50px; min-width: 50px; width: 50px; min-height: 50px; }
+  .extension-callout > img { width: 34px; height: 34px; }
+  .landing-extension { padding: 72px 22px; grid-template-columns: 72px minmax(0, 1fr); gap: 20px; }
+  .landing-extension h2 { font-size: clamp(31px, 9vw, 44px); }
+  .landing-extension div > p:last-child { grid-column: 1 / -1; font-size: 17px; }
 }

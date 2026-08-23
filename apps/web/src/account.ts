@@ -25,6 +25,7 @@ export interface AccountClient {
   listRecordings(): Promise<AccountRecordingLibrary>;
   getBilling(): Promise<AccountBillingSnapshot>;
   startCheckout(plan: PaidAccountPlan): Promise<string>;
+  startPlanChange(plan: PaidAccountPlan): Promise<string>;
   openBillingPortal(): Promise<string>;
   startSignIn(returnUrl: string): Promise<string>;
   signOut(returnUrl: string): Promise<{ snapshot: AccountSnapshot; redirectUrl?: string }>;
@@ -175,6 +176,17 @@ export function createAccountClient(fetcher: typeof fetch = globalThis.fetch): A
     async startCheckout(plan) {
       const payload = accountBillingRedirectSchema.parse(await request(
         "/v1/account/billing/checkout",
+        {
+          method: "POST",
+          headers: { "Idempotency-Key": crypto.randomUUID() },
+          body: JSON.stringify({ plan }),
+        },
+      ));
+      return safeRedirect(payload.url);
+    },
+    async startPlanChange(plan) {
+      const payload = accountBillingRedirectSchema.parse(await request(
+        "/v1/account/billing/plan-change",
         {
           method: "POST",
           headers: { "Idempotency-Key": crypto.randomUUID() },
