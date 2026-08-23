@@ -12,6 +12,8 @@ import { pricingQuery } from "./plan-catalog";
 import { appPagePath, appPath } from "./public-path";
 import { recordingViewLabel } from "./studio-controls";
 
+import "./AccountDialog.css";
+
 function AccountIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4.5 21c.8-5 3.3-7 7.5-7s6.7 2 7.5 7" /></svg>;
 }

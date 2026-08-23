@@ -4,11 +4,28 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const base = process.env.VITE_BASE_PATH || "/";
 const appBase = base.endsWith("/") ? base : `${base}/`;
+const pwaBuildId = process.env.VITE_PWA_BUILD_ID?.trim() ?? "";
+const testOutDir = process.env.VITE_TEST_OUT_DIR?.trim() ?? "";
+
+if (pwaBuildId && !/^[a-z0-9-]+$/i.test(pwaBuildId)) {
+  throw new Error("VITE_PWA_BUILD_ID must contain only letters, numbers, and hyphens.");
+}
 
 export default defineConfig({
   base: appBase,
+  ...(testOutDir ? { build: { emptyOutDir: false, outDir: testOutDir } } : {}),
   plugins: [
     react(),
+    {
+      name: "porchcast-pwa-build-marker",
+      transformIndexHtml() {
+        return pwaBuildId ? [{
+          tag: "meta",
+          attrs: { content: pwaBuildId, name: "porchcast-build" },
+          injectTo: "head",
+        }] : [];
+      },
+    },
     VitePWA({
       manifest: {
         id: appBase,
@@ -47,7 +64,13 @@ export default defineConfig({
       registerType: "prompt",
       workbox: {
         cleanupOutdatedCaches: true,
-        globIgnores: ["pwa-*.png"],
+        // Cloud rooms require a connection, so keep that large route out of the
+        // install-time shell. Account UI stays cached because its trigger is
+        // always visible and must degrade safely while offline.
+        globIgnores: [
+          "pwa-*.png",
+          "assets/CloudStudioView-*",
+        ],
         globPatterns: ["**/*.{css,html,js,png,svg,webp,woff,woff2}"],
         maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
         navigateFallback: "index.html",

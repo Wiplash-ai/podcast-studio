@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AccountRoomSummary } from "@wiplash/podcast-contracts";
 
-import { roomRequestHeaders } from "./App";
+import { roomRequestHeaders } from "./studio-utils";
 import {
   accountReturnUrl,
   consumeAccountSignInRedirect,

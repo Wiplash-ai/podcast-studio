@@ -57,18 +57,34 @@ export function PwaStatus({
       setRoomNoticeTop(null);
       return;
     }
-    const header = document.querySelector<HTMLElement>(roomHeaderSelector);
+    let header: HTMLElement | null = null;
+    let mountObserver: MutationObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    const updatePosition = () => {
+      setRoomNoticeTop(header ? header.getBoundingClientRect().bottom + 12 : null);
+    };
+    const attachHeader = () => {
+      const nextHeader = document.querySelector<HTMLElement>(roomHeaderSelector);
+      if (nextHeader === header) return;
+      resizeObserver?.disconnect();
+      header = nextHeader;
+      updatePosition();
+      if (header) {
+        resizeObserver = new ResizeObserver(updatePosition);
+        resizeObserver.observe(header);
+        mountObserver?.disconnect();
+        mountObserver = null;
+      }
+    };
+    attachHeader();
     if (!header) {
-      setRoomNoticeTop(null);
-      return;
+      mountObserver = new MutationObserver(attachHeader);
+      mountObserver.observe(document.body, { childList: true, subtree: true });
     }
-    const updatePosition = () => setRoomNoticeTop(header.getBoundingClientRect().bottom + 12);
-    updatePosition();
-    const observer = new ResizeObserver(updatePosition);
-    observer.observe(header);
     window.addEventListener("resize", updatePosition);
     return () => {
-      observer.disconnect();
+      mountObserver?.disconnect();
+      resizeObserver?.disconnect();
       window.removeEventListener("resize", updatePosition);
     };
   }, [roomHeaderSelector]);

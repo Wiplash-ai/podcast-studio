@@ -2,6 +2,22 @@ import { expect, test } from "@playwright/test";
 
 const forbiddenRuntimeRequest = /\/(?:v1|internal)(?:\/|$)|\/(?:whip|whep)(?:\/|$)|\.(?:m4a|mkv|mov|mp4|opus|wav|webm)(?:$|[?#])/i;
 
+function relativeLuminance([red, green, blue]: [number, number, number]): number {
+  const [r, g, b] = [red, green, blue].map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.04045
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastRatio(first: [number, number, number], second: [number, number, number]): number {
+  const lighter = Math.max(relativeLuminance(first), relativeLuminance(second));
+  const darker = Math.min(relativeLuminance(first), relativeLuminance(second));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 test("explicit demo renders a full local studio without API or device access", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const forbiddenRequests: string[] = [];
@@ -78,6 +94,45 @@ test("Cloud remains the default runtime", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /Record a real podcast/i })).toBeVisible();
   await expect(page.getByText("LOCAL DEMO · SIMULATED MEDIA")).toHaveCount(0);
+});
+
+test("a direct demo entry loads the room chunk without the public or Cloud routes", async ({ page }) => {
+  const routeAssets: string[] = [];
+  page.on("request", (request) => {
+    const asset = new URL(request.url()).pathname.split("/").at(-1) ?? "";
+    if (/^(?:AccountDialog|BookingView|CloudStudioView|DemoStudioView|PublicSite)-/.test(asset)) {
+      routeAssets.push(asset);
+    }
+  });
+
+  await page.goto("/?demo=ready");
+  await expect(page.getByRole("heading", { name: "Porchcast demo" })).toBeVisible();
+
+  expect(routeAssets.some((asset) => asset.startsWith("DemoStudioView-"))).toBe(true);
+  expect(routeAssets.filter((asset) => (
+    /^(?:AccountDialog|BookingView|CloudStudioView|PublicSite)-/.test(asset)
+  ))).toEqual([]);
+});
+
+test("demo scenario label has readable text contrast", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/?demo=ready");
+
+  const colors = await page.getByText("Scenario", { exact: true }).evaluate((label) => {
+    const parseRgb = (value: string): [number, number, number] => {
+      const channels = value.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+      if (!channels || channels.length !== 3) throw new Error(`Expected an RGB color, received ${value}`);
+      return channels as [number, number, number];
+    };
+    const container = label.closest<HTMLElement>(".demo-studio__scenario");
+    if (!container) throw new Error("Missing demo scenario container");
+    return {
+      background: parseRgb(getComputedStyle(container).backgroundColor),
+      foreground: parseRgb(getComputedStyle(label).color),
+    };
+  });
+
+  expect(contrastRatio(colors.foreground, colors.background)).toBeGreaterThanOrEqual(4.5);
 });
 
 test("demo marketing navigation round-trips and account actions remain visibly local", async ({ page }) => {

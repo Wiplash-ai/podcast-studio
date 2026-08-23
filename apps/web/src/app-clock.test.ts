@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatClock,
   formatRecordingClock,
-} from "./App";
+} from "./studio-utils";
 import { bookingStepCanContinue } from "./BookingView";
 import { randomDisplayName } from "./participant-name";
 

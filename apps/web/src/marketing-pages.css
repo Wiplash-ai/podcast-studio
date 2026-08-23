@@ -96,16 +96,6 @@
 .marketing-footer a { color: #b8b0c0; font-size: 14px; text-decoration: none; }
 .marketing-footer a:hover { color: #c4b5fd; }
 .marketing-footer > small { grid-column: 1 / -1; font-size: 12px; }
-
-.account-plan-link { min-height: 38px; margin-top: 10px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; color: #c4b5fd; background: rgba(124,58,237,.08); border: 1px solid rgba(167,139,250,.18); border-radius: 10px; font-size: 11px; font-weight: 750; text-decoration: none; }
-.account-billing-summary { margin: 10px 0 0; padding: 10px 12px; display: grid; gap: 2px; color: #d8d0df; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; }
-.account-billing-summary strong { font-size: 12px; }
-.account-billing-summary span { color: #9f97a7; font-size: 11px; }
-.account-billing-summary.test { border-color: rgba(110,231,183,.18); }
-.account-billing-summary.test span { color: #6ee7b7; }
-.account-plan-link:hover { color: #fff; background: rgba(124,58,237,.16); }
-.account-plan-link span:last-child { font-size: 15px; }
-.wizard-account-upgrade { color: #c4b5fd; text-underline-offset: 2px; }
 .landing-nav a[aria-current="page"] { color: #ddd6fe; }
 
 @media (max-width: 1080px) {

@@ -66,9 +66,20 @@ test("production app shell reopens offline without caching API or media traffic"
   await page.unrouteAll({ behavior: "wait" });
   await context.setOffline(true);
 
-  const offlineResponse = await page.goto("/", { waitUntil: "domcontentloaded" });
-  expect(offlineResponse?.fromServiceWorker()).toBe(true);
-  await expect(page.getByRole("heading", { name: /Record a real podcast/i })).toBeVisible();
+  const offlineSurfaces = [
+    { path: "/", heading: /Record a real podcast/i },
+    { path: "/pricing", heading: /Start free/i },
+    { path: "/privacy", heading: /Your conversation is the product/i },
+    { path: "/?demo=ready", heading: /Porchcast demo/i },
+  ];
+  for (const surface of offlineSurfaces) {
+    const offlineResponse = await page.goto(surface.path, { waitUntil: "domcontentloaded" });
+    expect(offlineResponse?.fromServiceWorker(), `${surface.path} should use the offline shell`).toBe(true);
+    await expect(page.getByRole("heading", { name: surface.heading })).toBeVisible();
+  }
+  await page.getByRole("button", { name: "Sign in with Wiplash.ai" }).click();
+  await expect(page.getByRole("dialog", { name: /Your podcasts, one sign-in away/i })).toBeVisible();
+  await page.getByRole("button", { name: "Close account" }).click();
   expect(await page.evaluate(
     () => fetch("/uncached-network-probe").then(() => false).catch(() => true),
   )).toBe(true);

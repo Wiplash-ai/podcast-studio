@@ -17,6 +17,8 @@ import { randomDisplayName } from "./participant-name";
 import { appPath } from "./public-path";
 import type { BookRoomInput } from "./room-booking";
 
+import "./BookingView.css";
+
 const videoPresets: Array<{
   id: VideoPreset;
   name: string;
@@ -64,6 +66,7 @@ function GuestSeatSelect({
 }) {
   const [open, setOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const selected = guestSeatOptions.find((option) => option.value === value) ?? guestSeatOptions[1];
 
   useEffect(() => {
@@ -71,25 +74,27 @@ function GuestSeatSelect({
     function onPointerDown(event: PointerEvent) {
       if (!container.current?.contains(event.target as Node)) setOpen(false);
     }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
 
   return (
-    <div className="guest-seat-select" ref={container}>
+    <div className="guest-seat-select" onKeyDown={(event) => {
+      if (!open || event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      setOpen(false);
+      trigger.current?.focus();
+    }} ref={container}>
       <button
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-labelledby="guest-seat-label guest-seat-value"
         className="guest-seat-trigger"
         onClick={() => setOpen((current) => !current)}
+        ref={trigger}
         type="button"
       >
         <span><strong id="guest-seat-value">{selected.label}</strong><small>{selected.detail}</small></span>
@@ -137,6 +142,8 @@ export function BookingView({
   onClose,
   onPremium,
 }: BookingViewProps) {
+  const restoreFocus = useRef<HTMLElement | null>(null);
+  const titleInput = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState("The next great conversation");
   const [hostName, setHostName] = useState(() => randomDisplayName());
@@ -155,6 +162,16 @@ export function BookingView({
       setMaxGuests(accountStorage.guestSeatLimit);
     }
   }, [accountStorage.guestSeatLimit, maxGuests]);
+
+  useEffect(() => {
+    restoreFocus.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    titleInput.current?.focus();
+    return () => {
+      if (restoreFocus.current?.isConnected) restoreFocus.current.focus();
+    };
+  }, []);
 
   function toggleLayout(layout: RecorderLayout) {
     setRequestedLayouts((current) => {
@@ -188,6 +205,27 @@ export function BookingView({
         aria-label="Book a Porchcast room"
         aria-modal="true"
         className="booking-workspace booking-wizard booking-modal"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            event.stopPropagation();
+            onClose();
+            return;
+          }
+          if (event.key !== "Tab") return;
+          const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+            'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])',
+          )).filter((element) => element.getClientRects().length > 0);
+          const first = focusable.at(0);
+          const last = focusable.at(-1);
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last?.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus();
+          }
+        }}
         onSubmit={(event) => void submit(event)}
         role="dialog"
       >
@@ -222,6 +260,7 @@ export function BookingView({
                 <input
                   maxLength={120}
                   onChange={(event) => setTitle(event.target.value)}
+                  ref={titleInput}
                   required
                   value={title}
                 />

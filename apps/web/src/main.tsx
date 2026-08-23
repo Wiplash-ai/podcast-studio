@@ -1,6 +1,3 @@
-import "@fontsource-variable/manrope";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/500.css";
 import {
   Component,
   StrictMode,
@@ -10,8 +7,8 @@ import {
 import { createRoot } from "react-dom/client";
 
 import { App } from "./App";
+import "./fonts.css";
 import "./styles.css";
-import "./marketing-pages.css";
 
 interface ApplicationErrorBoundaryState {
   failed: boolean;

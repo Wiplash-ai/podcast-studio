@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Keep service endpoints and private room links out of search results while
+# leaving the public Porchcast pages available to crawlers.
+Disallow: /v1/
+Disallow: /internal/
+Disallow: /healthz
+Disallow: /gateway-healthz
+Disallow: /*?*code=
+Disallow: /*?*invite=
+Disallow: /*?*room=
+Disallow: /*?*state=
+Disallow: /*?*token=

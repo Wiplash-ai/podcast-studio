@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readdir } from "node:fs/promises";
+import { resolve } from "node:path";
 
 const anonymousAccount = {
   account: null,
@@ -10,6 +12,15 @@ const anonymousAccount = {
     guestSeatLimit: 2,
   },
 };
+
+async function loadCloudFixtureStyles(page: Page) {
+  const assets = await readdir(resolve(import.meta.dirname, "../../apps/web/dist/assets"));
+  const stylesheet = assets.find((asset) => (
+    /^CloudStudioView-.*\.css$/.test(asset)
+  ));
+  if (!stylesheet) throw new Error("The production build is missing the Cloud route stylesheet.");
+  await page.addStyleTag({ url: `/assets/${stylesheet}` });
+}
 
 async function prepare(page: Page, width: number, height: number) {
   await page.setViewportSize({ width, height });
@@ -58,6 +69,7 @@ async function offerPwaInstall(page: Page) {
 
 async function renderRoomFixture(page: Page, options: { participantCount: number; screenActive?: boolean }) {
   await page.goto("/");
+  await loadCloudFixtureStyles(page);
   const participants = Array.from({ length: options.participantCount }, (_, index) => `
     <figure class="participant-tile ${index === options.participantCount - 1 ? "local-participant" : "remote-participant"}">
       <figcaption>${index === options.participantCount - 1 ? "YOU · HOST" : `GUEST ${index + 1}`}</figcaption>
@@ -101,6 +113,7 @@ async function renderRoomFixture(page: Page, options: { participantCount: number
 
 async function renderPreflightFixture(page: Page) {
   await page.goto("/");
+  await loadCloudFixtureStyles(page);
   await page.evaluate(() => {
     document.body.innerHTML = `
       <div id="root"><div class="app-shell">
@@ -154,6 +167,75 @@ for (const viewport of [
     await expectMinimumSize(page, ".guest-seat-trigger", 44, 44);
   });
 }
+
+test("booking dialog receives focus and returns it to its trigger when dismissed", async ({ page }) => {
+  await prepare(page, 390, 844);
+  await page.goto("/");
+
+  const bookingTrigger = page.getByRole("button", { name: "Book a room" }).first();
+  await bookingTrigger.click();
+
+  const dialog = page.getByRole("dialog", { name: "Book a Porchcast room" });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByLabel("Episode or room name")).toBeFocused();
+
+  await page.keyboard.press("Escape");
+
+  await expect(dialog).toHaveCount(0);
+  await expect(bookingTrigger).toBeFocused();
+});
+
+test("booking dialog contains keyboard focus", async ({ page }) => {
+  await prepare(page, 390, 844);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Book a room" }).first().click();
+
+  const continueButton = page.getByRole("button", { name: /Continue/ });
+  for (let presses = 0; presses < 12 && !(await continueButton.evaluate(
+    (element) => element === document.activeElement,
+  )); presses += 1) {
+    await page.keyboard.press("Tab");
+  }
+  await expect(continueButton).toBeFocused();
+
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Close room booking" })).toBeFocused();
+
+  await page.keyboard.press("Shift+Tab");
+  await expect(continueButton).toBeFocused();
+});
+
+test("Escape closes the guest-seat list before the booking dialog", async ({ page }) => {
+  await prepare(page, 390, 844);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Book a room" }).first().click();
+
+  const dialog = page.getByRole("dialog", { name: "Book a Porchcast room" });
+  const guestSeats = page.getByRole("button", { name: /Guest seats 1 guest/i });
+  await guestSeats.click();
+  await expect(page.getByRole("listbox", { name: "Guest seats" })).toBeVisible();
+
+  await page.keyboard.press("Escape");
+
+  await expect(page.getByRole("listbox", { name: "Guest seats" })).toHaveCount(0);
+  await expect(dialog).toBeVisible();
+  await expect(guestSeats).toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});
+
+test("mobile header keeps the home control named and touch sized", async ({ page }) => {
+  await prepare(page, 320, 568);
+  await page.goto("/");
+
+  const home = page.getByRole("button", { name: "Porchcast home" });
+  await expect(home).toBeVisible();
+  const box = await home.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.width).toBeGreaterThanOrEqual(44);
+  expect(box!.height).toBeGreaterThanOrEqual(44);
+});
 
 test("phone pricing and privacy surfaces remain readable without sideways scrolling", async ({ page }) => {
   await prepare(page, 390, 844);

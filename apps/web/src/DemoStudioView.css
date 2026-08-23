@@ -168,7 +168,7 @@
 }
 
 .demo-studio__scenario span {
-  color: #6e6e73;
+  color: var(--demo-muted);
   font: 700 9px/1.2 "IBM Plex Mono", ui-monospace, monospace;
   letter-spacing: .1em;
   text-transform: uppercase;
