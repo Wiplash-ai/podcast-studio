@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  bookingStepCanContinue,
   formatClock,
   formatRecordingClock,
-  randomDisplayName,
 } from "./App";
+import { bookingStepCanContinue } from "./BookingView";
+import { randomDisplayName } from "./participant-name";
 
 describe("recording status clock", () => {
   it("derives a stable nonnegative timer from the authoritative recording epoch", () => {

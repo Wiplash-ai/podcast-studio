@@ -23,3 +23,9 @@ support-bundles/
 *.opus
 *.m4a
 *.mov
+
+# Xcode
+apps/ios/build/
+apps/ios/DerivedData/
+*.xcuserstate
+xcuserdata/

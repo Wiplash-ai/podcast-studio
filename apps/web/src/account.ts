@@ -261,3 +261,27 @@ export function createAccountClient(fetcher: typeof fetch = globalThis.fetch): A
     },
   };
 }
+
+export function createUnavailableAccountClient(
+  message = "Account features are unavailable in the local demo.",
+): AccountClient {
+  async function unavailable(): Promise<never> {
+    throw new Error(message);
+  }
+
+  return {
+    getSnapshot: unavailable,
+    listRooms: unavailable,
+    listRecordings: unavailable,
+    getBilling: unavailable,
+    startCheckout: unavailable,
+    startPlanChange: unavailable,
+    openBillingPortal: unavailable,
+    startSignIn: unavailable,
+    signOut: unavailable,
+    claimRoom: unavailable,
+    updateRoom: unavailable,
+    deleteRoom: unavailable,
+    reissueRoomInvitation: unavailable,
+  };
+}

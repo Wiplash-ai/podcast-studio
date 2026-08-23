@@ -1,7 +1,7 @@
 {
   "name": "podcast-studio-web",
   "version": "0.1.0",
-  "description": "The public browser application for Wiplash Porchcast.",
+  "description": "The public web and native clients for Wiplash Porchcast.",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -15,7 +15,11 @@
     "test:responsive": "playwright test",
     "typecheck": "npm run build -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-web",
     "boundary:check": "node scripts/check-public-boundary.mjs && node scripts/check-gateway-boundary.mjs",
-    "verify": "npm run boundary:check && npm run test && npm run typecheck && npm run build && npm run test:responsive"
+    "pwa:check": "node scripts/check-pwa-boundary.mjs",
+    "ios:sourcecheck": "bash scripts/check-ios-source.sh",
+    "ios:build": "bash scripts/build-ios.sh",
+    "ios:test:build": "bash scripts/build-ios-tests.sh",
+    "verify": "npm run boundary:check && npm run test && npm run typecheck && npm run build && npm run pwa:check && npm run test:responsive"
   },
   "engines": {
     "node": ">=20.19.0"

@@ -43,6 +43,19 @@ async function expectMinimumSize(page: Page, selector: string, width: number, he
   expect(box!.height).toBeGreaterThanOrEqual(height);
 }
 
+async function offerPwaInstall(page: Page) {
+  await page.evaluate(() => {
+    const event = new Event("beforeinstallprompt", { cancelable: true });
+    Object.defineProperties(event, {
+      prompt: { value: () => Promise.resolve() },
+      userChoice: {
+        value: Promise.resolve({ outcome: "dismissed", platform: "test" }),
+      },
+    });
+    window.dispatchEvent(event);
+  });
+}
+
 async function renderRoomFixture(page: Page, options: { participantCount: number; screenActive?: boolean }) {
   await page.goto("/");
   const participants = Array.from({ length: options.participantCount }, (_, index) => `
@@ -122,6 +135,8 @@ for (const viewport of [
     await prepare(page, viewport.width, viewport.height);
     await page.goto("/");
     await expect(page.getByRole("heading", { name: /Record a real podcast/i })).toBeVisible();
+    await offerPwaInstall(page);
+    await expect(page.getByRole("button", { name: /Install app/i })).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectInsideViewport(page, ".topbar");
     await expectInsideViewport(page, ".landing-hero h1");
@@ -176,6 +191,31 @@ test("a thirteen-person portrait room uses readable stacked cards", async ({ pag
   expect(controlMetrics.scrollWidth).toBeGreaterThan(controlMetrics.clientWidth);
   await controls.evaluate((element) => element.scrollTo({ left: element.scrollWidth }));
   await expectInsideViewport(page, ".record-control");
+});
+
+test("an in-room offline notice never blocks studio controls", async ({ page }) => {
+  await prepare(page, 390, 844);
+  await renderRoomFixture(page, { participantCount: 2 });
+  await page.evaluate(() => {
+    const notice = document.createElement("aside");
+    notice.className = "pwa-status pwa-status-offline pwa-status-in-room";
+    notice.innerHTML = "<span>Offline</span><p>Cloud features are reconnecting.</p>";
+    document.querySelector(".app-shell")?.append(notice);
+  });
+
+  const notice = page.locator(".pwa-status-in-room");
+  await expect(notice).toBeVisible();
+  await expect(notice).toHaveCSS("pointer-events", "none");
+  await expectInsideViewport(page, ".pwa-status-in-room");
+
+  const noticeBox = await notice.boundingBox();
+  const headerBox = await page.locator(".studio-header").boundingBox();
+  const controlsBox = await page.locator(".stage-controls-overlay").boundingBox();
+  expect(noticeBox).not.toBeNull();
+  expect(headerBox).not.toBeNull();
+  expect(controlsBox).not.toBeNull();
+  expect(noticeBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height);
+  expect(noticeBox!.y + noticeBox!.height).toBeLessThan(controlsBox!.y);
 });
 
 test("portrait screen sharing keeps the screen readable and cameras in a swipe rail", async ({ page }) => {

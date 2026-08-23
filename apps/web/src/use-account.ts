@@ -12,6 +12,7 @@ import type {
 import {
   accountReturnUrl,
   createAccountClient,
+  createUnavailableAccountClient,
   EMPTY_ACCOUNT_SNAPSHOT,
   rememberAccountSignInRedirect,
 } from "./account";
@@ -37,8 +38,11 @@ export interface AccountModel {
   clearError(): void;
 }
 
-export function useAccount(): AccountModel {
-  const client = useMemo(() => createAccountClient(), []);
+export function useAccount({ enabled = true }: { enabled?: boolean } = {}): AccountModel {
+  const client = useMemo(
+    () => enabled ? createAccountClient() : createUnavailableAccountClient(),
+    [enabled],
+  );
   const [snapshot, setSnapshot] = useState<AccountSnapshot>(EMPTY_ACCOUNT_SNAPSHOT);
   const [rooms, setRooms] = useState<AccountRoomSummary[]>([]);
   const [recordingLibrary, setRecordingLibrary] = useState<AccountRecordingLibrary | null>(null);
@@ -48,6 +52,15 @@ export function useAccount(): AccountModel {
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
+    if (!enabled) {
+      setSnapshot(EMPTY_ACCOUNT_SNAPSHOT);
+      setRooms([]);
+      setRecordingLibrary(null);
+      setBilling(null);
+      setStatus("available");
+      setError("");
+      return;
+    }
     setStatus("checking");
     try {
       const next = await client.getSnapshot();
@@ -75,7 +88,7 @@ export function useAccount(): AccountModel {
       setBilling(null);
       setStatus("unavailable");
     }
-  }, [client]);
+  }, [client, enabled]);
 
   useEffect(() => {
     void refresh();

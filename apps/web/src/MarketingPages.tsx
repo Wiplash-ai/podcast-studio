@@ -5,10 +5,16 @@ import { pricingAction } from "./pricing-action";
 import { appPagePath, type PublicAppPage } from "./public-path";
 import type { AccountModel } from "./use-account";
 
-function MarketingFooter({ onNavigate }: { onNavigate: (page: PublicAppPage) => void }) {
+function MarketingFooter({
+  onNavigate,
+  publicPath = appPagePath,
+}: {
+  onNavigate: (page: PublicAppPage) => void;
+  publicPath?: (page: PublicAppPage) => string;
+}) {
   function publicLink(page: PublicAppPage) {
     return {
-      href: appPagePath(page),
+      href: publicPath(page),
       onClick: (event: MouseEvent<HTMLAnchorElement>) => {
         event.preventDefault();
         onNavigate(page);
@@ -30,18 +36,26 @@ function MarketingFooter({ onNavigate }: { onNavigate: (page: PublicAppPage) => 
   );
 }
 
-export function LandingFooter({ onNavigate }: { onNavigate: (page: PublicAppPage) => void }) {
-  return <MarketingFooter onNavigate={onNavigate} />;
+export function LandingFooter({
+  onNavigate,
+  publicPath,
+}: {
+  onNavigate: (page: PublicAppPage) => void;
+  publicPath?: (page: PublicAppPage) => string;
+}) {
+  return <MarketingFooter onNavigate={onNavigate} publicPath={publicPath} />;
 }
 
 export function PricingView({
   account,
   onBook,
   onNavigate,
+  publicPath,
 }: {
   account: AccountModel;
   onBook: () => void;
   onNavigate: (page: PublicAppPage) => void;
+  publicPath?: (page: PublicAppPage) => string;
 }) {
   return (
     <main className="marketing-main pricing-page">
@@ -61,7 +75,12 @@ export function PricingView({
 
       <section className="pricing-grid" aria-label="Porchcast plans">
         {podcastPlans.map((plan) => {
-          const action = pricingAction(plan.id, account.billing, Boolean(account.snapshot.account));
+          const action = pricingAction(
+            plan.id,
+            account.billing,
+            Boolean(account.snapshot.account),
+            account.snapshot.capabilities.signInAvailable,
+          );
           const isCurrentSubscription = account.billing?.subscriptionPlan === plan.id;
           const isInternalStudio = account.billing?.plan === "internal" && plan.id === "studio";
           const actionClass = `plan-action${plan.id === "free" ? "" : " secondary"}`;
@@ -107,7 +126,7 @@ export function PricingView({
           {pricingQuestions.map((item, index) => <details key={item.question} open={index === 0}><summary>{item.question}</summary><p>{item.answer}</p></details>)}
         </div>
       </section>
-      <MarketingFooter onNavigate={onNavigate} />
+      <MarketingFooter onNavigate={onNavigate} publicPath={publicPath} />
     </main>
   );
 }
@@ -175,7 +194,13 @@ const policySections = [
   },
 ];
 
-export function PrivacyView({ onNavigate }: { onNavigate: (page: PublicAppPage) => void }) {
+export function PrivacyView({
+  onNavigate,
+  publicPath,
+}: {
+  onNavigate: (page: PublicAppPage) => void;
+  publicPath?: (page: PublicAppPage) => string;
+}) {
   return (
     <main className="marketing-main privacy-page">
       <section className="marketing-hero privacy-hero">
@@ -208,7 +233,7 @@ export function PrivacyView({ onNavigate }: { onNavigate: (page: PublicAppPage) 
           ))}
         </div>
       </article>
-      <MarketingFooter onNavigate={onNavigate} />
+      <MarketingFooter onNavigate={onNavigate} publicPath={publicPath} />
     </main>
   );
 }

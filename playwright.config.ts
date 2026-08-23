@@ -1,7 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./tests/responsive",
+  testDir: ".",
+  testMatch: ["tests/responsive/**/*.spec.ts", "apps/web/tests/**/*.pw.ts"],
   timeout: 30_000,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),

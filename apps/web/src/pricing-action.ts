@@ -21,6 +21,7 @@ export function pricingAction(
   plan: PodcastPlanId,
   billing: AccountBillingSnapshot | null,
   signedIn: boolean,
+  signInAvailable = true,
 ): PricingAction {
   if (plan === "free") {
     if (signedIn && billing?.subscriptionPlan && billing.portalAvailable) {
@@ -32,6 +33,9 @@ export function pricingAction(
     };
   }
   const name = planNames[plan];
+  if (!signedIn && !signInAvailable) {
+    return { kind: "unavailable", label: "Account sign-in unavailable" };
+  }
   if (!signedIn) return { kind: "sign-in", label: `Sign in for ${name}` };
   if (billing?.plan === "internal") {
     return {

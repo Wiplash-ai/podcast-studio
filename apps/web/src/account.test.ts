@@ -6,6 +6,7 @@ import {
   accountReturnUrl,
   consumeAccountSignInRedirect,
   createAccountClient,
+  createUnavailableAccountClient,
   rememberAccountSignInRedirect,
 } from "./account";
 
@@ -59,6 +60,19 @@ const accountRoom = {
 } satisfies AccountRoomSummary;
 
 describe("Porchcast account client", () => {
+  it("keeps every account operation offline when the runtime disables accounts", async () => {
+    const fetcher = vi.spyOn(globalThis, "fetch");
+    const client = createUnavailableAccountClient();
+
+    await expect(client.getSnapshot()).rejects.toThrow("local demo");
+    await expect(client.startSignIn("https://labs.wiplash.ai/")).rejects.toThrow("local demo");
+    await expect(client.startCheckout("creator")).rejects.toThrow("local demo");
+    await expect(client.claimRoom(accountRoom.room.id, "host-token")).rejects.toThrow("local demo");
+    expect(fetcher).not.toHaveBeenCalled();
+
+    fetcher.mockRestore();
+  });
+
   it("uses the in-memory account CSRF value for tokenless owned-room requests", () => {
     expect(roomRequestHeaders("", "account-csrf", { Accept: "application/json" })).toEqual({
       Accept: "application/json",

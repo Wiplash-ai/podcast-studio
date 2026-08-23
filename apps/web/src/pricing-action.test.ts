@@ -97,4 +97,12 @@ describe("Porchcast pricing actions", () => {
     expect(pricingAction("creator", free, true).kind).toBe("checkout");
     expect(pricingAction("creator", null, false).kind).toBe("sign-in");
   });
+
+  it("does not expose a dead sign-in action when accounts are unavailable", () => {
+    expect(pricingAction("creator", null, false, false)).toEqual({
+      kind: "unavailable",
+      label: "Account sign-in unavailable",
+    });
+    expect(pricingAction("free", null, false, false).kind).toBe("book");
+  });
 });
