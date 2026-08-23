@@ -22,6 +22,8 @@ type CompanionWindow = Window & typeof globalThis & {
   [INSTALL_KEY]?: true;
 };
 
+type ActionIcon = "account" | "book" | "home";
+
 const companionWindow = window as CompanionWindow;
 
 if (!companionWindow[INSTALL_KEY]) {
@@ -47,7 +49,11 @@ if (!companionWindow[INSTALL_KEY]) {
   }
 
   function statusLabel(state: PorchcastCompanionSnapshot | null): string {
-    if (!state?.porch) return "Ready when you are";
+    if (!state?.porch) {
+      return state?.account.state === "ready" || state?.account.state === "degraded"
+        ? "Wiplash account connected"
+        : "Ready when you are";
+    }
     return {
       attention: "Needs attention",
       live: "Live Porch",
@@ -56,6 +62,17 @@ if (!companionWindow[INSTALL_KEY]) {
       rendering: "Preparing recordings",
       unknown: "Status unavailable",
     }[state.status];
+  }
+
+  function lifecycleLabel(value: string): string {
+    return value === "finalizing" ? "Preparing" : value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  function formatDuration(seconds: number | null): string {
+    if (seconds === null) return "Duration pending";
+    const hours = Math.floor(seconds / 3_600);
+    const minutes = Math.floor((seconds % 3_600) / 60);
+    return hours ? `${hours}h ${minutes}m` : `${Math.max(1, minutes)}m`;
   }
 
   function relativeVisit(value: string): string {
@@ -92,11 +109,47 @@ if (!companionWindow[INSTALL_KEY]) {
     await chrome.storage.local.set({ [PREFERENCES_KEY]: next });
   }
 
-  function makeAction(label: string, action: () => void, primary = false): HTMLButtonElement {
-    const button = element("button", primary ? "pc-action pc-primary" : "pc-action", label);
+  function actionIcon(name: ActionIcon): SVGSVGElement {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    const paths = {
+      account: ["M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z", "M4.5 21c.8-4.7 3.3-7 7.5-7s6.7 2.3 7.5 7"],
+      book: ["M6 3v3m12-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z", "M12 12v5m-2.5-2.5h5"],
+      home: ["m3.5 11 8.5-7 8.5 7", "M6 10v10h12V10", "M10 20v-6h4v6"],
+    }[name];
+    for (const data of paths) {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", data);
+      svg.append(path);
+    }
+    return svg;
+  }
+
+  function makeAction(
+    label: string,
+    icon: ActionIcon,
+    action: () => void,
+    primary = false,
+  ): HTMLButtonElement {
+    const button = element("button", primary ? "pc-action pc-primary" : "pc-action");
     button.type = "button";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.dataset.tooltip = label;
+    button.append(actionIcon(icon));
     button.addEventListener("click", action);
     return button;
+  }
+
+  function updateState(state: PorchcastCompanionSnapshot): void {
+    if (currentState && state.revision < currentState.revision) return;
+    currentState = state;
+    if (state.porch) {
+      recentPorches = upsertRecentPorch(recentPorches, state.porch, new Date().toISOString());
+      void chrome.storage.local.set({ [RECENTS_KEY]: recentPorches });
+    }
+    if (host) render();
   }
 
   function render(): void {
@@ -157,10 +210,15 @@ if (!companionWindow[INSTALL_KEY]) {
         body.append(element("p", "pc-intro", "Keep a Porch close while you work in another tab. Camera, microphone, and recording stay in the secure Porchcast page."));
       }
 
+      const accountState = currentState?.account.state ?? "checking";
+      const signedIn = accountState === "ready" || accountState === "degraded";
       const recents = element("section", "pc-recents");
       const recentsHeading = element("div", "pc-section-heading");
-      recentsHeading.append(element("strong", undefined, "Recent Porches"));
-      if (recentPorches.length > 0) {
+      recentsHeading.append(element("strong", undefined, signedIn ? "Your Porches" : "Recent Porches"));
+      const visiblePorches = signedIn
+        ? (currentState?.account.porches ?? []).slice(0, 4)
+        : recentPorches.slice(0, 4);
+      if (!signedIn && recentPorches.length > 0) {
         const clear = element("button", "pc-text-button", "Clear");
         clear.type = "button";
         clear.addEventListener("click", () => {
@@ -172,15 +230,20 @@ if (!companionWindow[INSTALL_KEY]) {
         recentsHeading.append(clear);
       }
       recents.append(recentsHeading);
-      if (recentPorches.length === 0) {
-        recents.append(element("p", "pc-empty", "Your recent Porches will appear after you join them."));
+      if (visiblePorches.length === 0) {
+        recents.append(element("p", "pc-empty", signedIn
+          ? "Your saved Porches will appear here."
+          : "Your recent Porches will appear after you join them."));
       } else {
         const list = element("div", "pc-porch-list");
-        for (const porch of recentPorches) {
+        for (const porch of visiblePorches) {
           const button = element("button", "pc-porch");
           button.type = "button";
           const copy = element("span");
-          copy.append(element("strong", undefined, porch.title), element("small", undefined, `${porch.role} · ${relativeVisit(porch.lastVisitedAt)}`));
+          const detail = "updatedAt" in porch
+            ? lifecycleLabel(porch.lifecycleState)
+            : `${porch.role} · ${relativeVisit(porch.lastVisitedAt)}`;
+          copy.append(element("strong", undefined, porch.title), element("small", undefined, detail));
           button.append(copy, element("i", undefined, "↗"));
           button.addEventListener("click", () => send({ type: "porchcast:open-porch", porchId: porch.id }));
           list.append(button);
@@ -189,13 +252,62 @@ if (!companionWindow[INSTALL_KEY]) {
       }
       body.append(recents);
 
+      if (signedIn) {
+        const recordings = element("section", "pc-library");
+        const recordingsHeading = element("div", "pc-section-heading");
+        const recordingItems = currentState?.account.recordings ?? [];
+        recordingsHeading.append(
+          element("strong", undefined, "Your Recordings"),
+          element("span", "pc-count", String(recordingItems.length)),
+        );
+        recordings.append(recordingsHeading);
+        if (recordingItems.length === 0) {
+          recordings.append(element("p", "pc-empty", accountState === "degraded"
+            ? "Recordings could not refresh. Open your account to retry."
+            : "Cloud recordings will appear here after you stop and save."));
+        } else {
+          const list = element("div", "pc-recording-list");
+          for (const recording of recordingItems.slice(0, 3)) {
+            const button = element("button", "pc-recording");
+            button.type = "button";
+            const copy = element("span");
+            copy.append(
+              element("strong", undefined, recording.name),
+              element("small", undefined, `${recording.porchTitle} · ${formatDuration(recording.durationSeconds)}`),
+            );
+            button.append(
+              copy,
+              element("i", `pc-recording-state pc-${recording.lifecycleState}`, lifecycleLabel(recording.lifecycleState)),
+            );
+            button.addEventListener("click", () => send({
+              type: "porchcast:open-recording",
+              porchId: recording.porchId,
+            }));
+            list.append(button);
+          }
+          recordings.append(list);
+        }
+        body.append(recordings);
+      } else if (accountState === "unavailable") {
+        body.append(element("p", "pc-account-note", "Wiplash account sync is unavailable. Open sign in to retry."));
+      }
+
       const actions = element("div", "pc-actions");
+      const accountLabel = signedIn ? "Open account" : "Sign in";
       actions.append(
-        makeAction("Book a Porch", () => send({ type: "porchcast:open-destination", destination: "book" }), true),
-        makeAction("Open Porchcast", () => send({ type: "porchcast:open-destination", destination: "app" })),
-        makeAction("Plans", () => send({ type: "porchcast:open-destination", destination: "pricing" })),
+        makeAction("Book a Porch", "book", () => send({ type: "porchcast:open-destination", destination: "book" }), true),
+        makeAction("Open Porchcast", "home", () => send({ type: "porchcast:open-destination", destination: "app" })),
+        makeAction(accountLabel, "account", () => send({ type: "porchcast:open-destination", destination: "account" })),
       );
       body.append(actions);
+      const footer = element("footer", "pc-footer");
+      footer.append(document.createTextNode("Produced by "));
+      const producer = element("a", undefined, "Wiplash.ai");
+      producer.href = "https://wiplash.ai";
+      producer.target = "_blank";
+      producer.rel = "noopener noreferrer";
+      footer.append(producer);
+      body.append(footer);
       panel.append(body);
     }
     root.append(panel);
@@ -248,6 +360,16 @@ if (!companionWindow[INSTALL_KEY]) {
     const stored = await chrome.storage.local.get([RECENTS_KEY, PREFERENCES_KEY]);
     recentPorches = normalizeRecentPorches(stored[RECENTS_KEY]);
     preferences = normalizeWidgetPreferences(stored[PREFERENCES_KEY]);
+    const cached = await new Promise<unknown>((resolve) => {
+      chrome.runtime.sendMessage({ type: "porchcast:get-state" }, (response) => {
+        void chrome.runtime.lastError;
+        resolve(response && typeof response === "object" && "state" in response
+          ? (response as { state: unknown }).state
+          : null);
+      });
+    });
+    const cachedMessage = parseCompanionStateMessage(cached);
+    if (cachedMessage) currentState = cachedMessage.payload;
     host = document.createElement("div");
     host.id = "porchcast-companion-root";
     host.style.position = "fixed";
@@ -261,23 +383,19 @@ if (!companionWindow[INSTALL_KEY]) {
     if (event.source !== window || event.origin !== PORCHCAST_APP_ORIGIN) return;
     const message = parseCompanionStateMessage(event.data);
     if (!message) return;
-    if (currentState && message.payload.revision < currentState.revision) return;
-    currentState = message.payload;
-    if (message.payload.porch) {
-      recentPorches = upsertRecentPorch(
-        recentPorches,
-        message.payload.porch,
-        new Date().toISOString(),
-      );
-      void chrome.storage.local.set({ [RECENTS_KEY]: recentPorches });
-    }
-    if (host) render();
+    updateState(message.payload);
+    send({ type: "porchcast:publish-state", state: message });
   }
 
   window.addEventListener("message", receivePageState);
   window.addEventListener("resize", applyPosition);
   chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) => {
     if (!message || typeof message !== "object" || !("type" in message)) return;
+    if ((message as { type: string }).type === "porchcast:state-broadcast") {
+      const state = parseCompanionStateMessage((message as { state?: unknown }).state);
+      if (state) updateState(state.payload);
+      return;
+    }
     if ((message as { type: string }).type !== "porchcast:toggle-widget") return;
     if (host?.isConnected) {
       host.remove();

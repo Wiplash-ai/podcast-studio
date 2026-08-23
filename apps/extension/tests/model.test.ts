@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_RECENT_PORCHES,
   destinationUrl,
+  isPorchcastAppUrl,
   normalizeRecentPorches,
   parseCompanionStateMessage,
   porchUrl,
@@ -55,6 +56,24 @@ describe("Porchcast extension model", () => {
         porch: { id: porchId, title: "Launch", role: "host" },
         status: "live",
         capabilities: { account: true, downloads: false, invite: true },
+        account: {
+          state: "ready",
+          porches: [{
+            id: porchId,
+            title: "Launch",
+            lifecycleState: "armed",
+            updatedAt: "2026-08-23T00:00:00.000Z",
+          }],
+          recordings: [{
+            id: "ca342c0d-9f7b-4e79-884c-14873789449f",
+            porchId,
+            name: "August 23, 2026",
+            porchTitle: "Launch",
+            lifecycleState: "ready",
+            createdAt: "2026-08-23T00:00:00.000Z",
+            durationSeconds: 300,
+          }],
+        },
         noticeKey: null,
       },
     };
@@ -63,6 +82,13 @@ describe("Porchcast extension model", () => {
       ...message,
       payload: { ...message.payload, roomToken: "secret" },
     })).toBeNull();
+    expect(parseCompanionStateMessage({
+      ...message,
+      payload: {
+        ...message.payload,
+        account: { ...message.payload.account, refreshToken: "secret" },
+      },
+    })).toBeNull();
   });
 
   it("constructs only the known Porchcast destinations", () => {
@@ -70,6 +96,9 @@ describe("Porchcast extension model", () => {
     expect(porchUrl("https://evil.example")).toBeNull();
     expect(destinationUrl("app")).toBe("https://labs.wiplash.ai/porchcast/");
     expect(destinationUrl("book")).toBe("https://labs.wiplash.ai/porchcast/?book=1");
-    expect(destinationUrl("pricing")).toBe("https://labs.wiplash.ai/porchcast/pricing");
+    expect(destinationUrl("account")).toBe("https://labs.wiplash.ai/porchcast/?account=1");
+    expect(isPorchcastAppUrl("https://labs.wiplash.ai/porchcast/?account=1")).toBe(true);
+    expect(isPorchcastAppUrl("https://labs.wiplash.ai/other")).toBe(false);
+    expect(isPorchcastAppUrl("https://evil.example/porchcast/")).toBe(false);
   });
 });

@@ -43,7 +43,8 @@ describe("Porchcast extension packages", () => {
       const content = await readFile(resolve(extensionRoot, "dist", browser, "scripts/content.js"), "utf8");
       const code = `${background}\n${content}`;
       expect(code).not.toMatch(/getUserMedia|desktopCapture|tabCapture|MediaRecorder|eval\(|new Function/);
-      expect(code).not.toMatch(/https?:\/\/(?!labs\.wiplash\.ai)/);
+      expect(code).not.toMatch(/https?:\/\/(?!(?:(?:labs\.)?wiplash\.ai|www\.w3\.org\/2000\/svg))/);
+      expect(code).not.toContain("Plans");
     }
   });
 });

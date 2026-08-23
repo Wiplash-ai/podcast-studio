@@ -116,6 +116,24 @@ describe("browser-safe Porchcast contracts", () => {
         porch: { id: roomId, title: "Release notes", role: "host" as const },
         status: "recording" as const,
         capabilities: { account: true, downloads: true, invite: true },
+        account: {
+          state: "ready" as const,
+          porches: [{
+            id: roomId,
+            title: "Release notes",
+            lifecycleState: "ready" as const,
+            updatedAt: "2026-08-23T00:00:00.000Z",
+          }],
+          recordings: [{
+            id: "ca342c0d-9f7b-4e79-884c-14873789449f",
+            porchId: roomId,
+            name: "August 23, 2026",
+            porchTitle: "Release notes",
+            lifecycleState: "ready" as const,
+            createdAt: "2026-08-23T00:00:00.000Z",
+            durationSeconds: 3_600,
+          }],
+        },
         noticeKey: null,
       },
     };
@@ -130,6 +148,13 @@ describe("browser-safe Porchcast contracts", () => {
     expect(porchcastCompanionStateMessageSchema.safeParse({
       ...message,
       payload: { ...message.payload, artifactUrl: "https://example.invalid/file.mp4" },
+    }).success).toBe(false);
+    expect(porchcastCompanionStateMessageSchema.safeParse({
+      ...message,
+      payload: {
+        ...message.payload,
+        account: { ...message.payload.account, accessToken: "secret" },
+      },
     }).success).toBe(false);
   });
 

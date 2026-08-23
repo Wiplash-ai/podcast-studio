@@ -684,6 +684,37 @@ export const porchcastCompanionPorchSchema = z.object({
   role: roomRoleSchema,
 }).strict();
 
+export const porchcastCompanionAccountStateSchema = z.enum([
+  "checking",
+  "signed_out",
+  "ready",
+  "degraded",
+  "unavailable",
+]);
+
+export const porchcastCompanionSavedPorchSchema = z.object({
+  id: z.string().regex(/^[A-Za-z0-9_-]{6,80}$/),
+  title: z.string().trim().min(1).max(120),
+  lifecycleState: lifecycleStateSchema,
+  updatedAt: z.string().datetime(),
+}).strict();
+
+export const porchcastCompanionRecordingSchema = z.object({
+  id: z.string().uuid(),
+  porchId: z.string().regex(/^[A-Za-z0-9_-]{6,80}$/),
+  name: z.string().trim().min(1).max(120),
+  porchTitle: z.string().trim().min(1).max(120),
+  lifecycleState: lifecycleStateSchema,
+  createdAt: z.string().datetime(),
+  durationSeconds: z.number().int().nonnegative().nullable(),
+}).strict();
+
+export const porchcastCompanionAccountSchema = z.object({
+  state: porchcastCompanionAccountStateSchema,
+  porches: z.array(porchcastCompanionSavedPorchSchema).max(20),
+  recordings: z.array(porchcastCompanionRecordingSchema).max(20),
+}).strict();
+
 export const porchcastCompanionSnapshotSchema = z.object({
   revision: z.number().int().nonnegative(),
   porch: porchcastCompanionPorchSchema.nullable(),
@@ -693,6 +724,7 @@ export const porchcastCompanionSnapshotSchema = z.object({
     downloads: z.boolean(),
     invite: z.boolean(),
   }).strict(),
+  account: porchcastCompanionAccountSchema,
   noticeKey: z.string().regex(/^[A-Za-z0-9:_-]{1,160}$/).nullable(),
 }).strict();
 

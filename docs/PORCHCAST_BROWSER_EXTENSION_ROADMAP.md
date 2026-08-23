@@ -11,15 +11,19 @@ The first implemented vertical slice now includes:
   Porchcast content-script match, no toolbar popup, and no media APIs;
 - an exact-field, versioned, token-free web-to-extension state bridge;
 - a Shadow DOM widget with pointer drag, keyboard movement, viewport clamping,
-  collapse, close/reopen, Book/Open/Pricing actions, and token-free recent Porch
+  collapse, close/reopen, Book/Open/Account actions, and token-free recent Porch
   history capped at ten;
+- an account-modal handoff plus browser-session-only synchronization of up to
+  twenty saved Porches and twenty recording summaries from the authenticated
+  web app, with no extension-held OAuth, CSRF, room, media, invitation, or
+  artifact capability;
 - deterministic contract, history, manifest, remote-code, and media-boundary
   tests plus 16/32/48/128 pixel cat icons;
 - an isolated BrowserOS 148 loaded-build check covering service-worker startup,
   widget toggle acknowledgement, keyboard movement, collapse, close/reopen,
   approved cat rendering, and token-free recent-Porch persistence.
 
-Still open before a store candidate: invite/download/account/leave command
+Still open before a store candidate: invite/download/leave command
 handoff, recording-ready notification permission and deduplication, offline
 retry UX, reproducible ZIP/source archives, loaded Firefox/Edge/Opera checks,
 the full manual browser matrix, listing assets, signing, and submission.

@@ -54,8 +54,11 @@ Load `apps/extension/dist/chromium` as an unpacked extension in Chrome,
 BrowserOS, Edge, or Opera. The toolbar action has no popup: it toggles a
 draggable companion inside the active tab. The companion stores only its
 presentation preferences and up to ten recent Porch records containing a
-stable Porch ID, title, role, and visit time. It never stores invitation links,
-room or media capabilities, chat, artifact URLs, or participant media.
+stable Porch ID, title, role, and visit time in persistent extension storage.
+While the browser is open, extension session storage may also hold up to twenty
+signed-in saved-Porch summaries and twenty recording summaries supplied by the
+authenticated web app. It never stores OAuth/session credentials, invitation
+links, room or media capabilities, chat, artifact URLs, or participant media.
 Current BrowserOS developer builds also require the
 `--enable-unsafe-extension-debugging` launch flag for unpacked extensions; that
 flag is not part of a signed store installation.

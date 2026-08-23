@@ -1,10 +1,59 @@
 import {
   porchcastCompanionStateRequestSchema,
+  type AccountRecordingLibrary,
+  type AccountRoomSummary,
   type PorchcastCompanionStateMessage,
   type PorchcastCompanionStatus,
   type Room,
   type RoomAccess,
 } from "@wiplash/podcast-contracts";
+
+export interface CompanionAccountSource {
+  status: "checking" | "available" | "unavailable";
+  signedIn: boolean;
+  rooms: AccountRoomSummary[];
+  recordingLibrary: AccountRecordingLibrary | null;
+}
+
+export function companionLaunchIntent(search: string): "account" | "book" | null {
+  const query = new URLSearchParams(search);
+  if (query.get("account") === "1") return "account";
+  if (query.get("book") === "1") return "book";
+  return null;
+}
+
+const signedOutAccount: PorchcastCompanionStateMessage["payload"]["account"] = {
+  state: "signed_out",
+  porches: [],
+  recordings: [],
+};
+
+export function companionAccountState(
+  source: CompanionAccountSource | null,
+): PorchcastCompanionStateMessage["payload"]["account"] {
+  if (!source) return signedOutAccount;
+  if (source.status === "checking") return { ...signedOutAccount, state: "checking" };
+  if (source.status === "unavailable") return { ...signedOutAccount, state: "unavailable" };
+  if (!source.signedIn) return signedOutAccount;
+  return {
+    state: source.recordingLibrary ? "ready" : "degraded",
+    porches: source.rooms.slice(0, 20).map((entry) => ({
+      id: entry.room.id,
+      title: entry.room.title,
+      lifecycleState: entry.room.lifecycleState,
+      updatedAt: entry.room.updatedAt,
+    })),
+    recordings: (source.recordingLibrary?.recordings ?? []).slice(0, 20).map((entry) => ({
+      id: entry.recording.id,
+      porchId: entry.recording.roomId,
+      name: entry.recording.name,
+      porchTitle: entry.roomTitle,
+      lifecycleState: entry.recording.lifecycleState,
+      createdAt: entry.recording.createdAt,
+      durationSeconds: entry.durationSeconds,
+    })),
+  };
+}
 
 export function companionStatusForRoom(
   room: Pick<Room, "lifecycleState" | "programs">,
@@ -30,7 +79,10 @@ export function companionStatusForRoom(
 export function companionStateMessage(
   access: RoomAccess | null,
   recordingActive: boolean,
+  accountSource: CompanionAccountSource | null = null,
+  revision = 0,
 ): PorchcastCompanionStateMessage {
+  const account = companionAccountState(accountSource);
   if (!access) {
     return {
       protocol: "porchcast-companion",
@@ -38,10 +90,11 @@ export function companionStateMessage(
       source: "porchcast-web",
       type: "state",
       payload: {
-        revision: 0,
+        revision,
         porch: null,
         status: "unknown",
         capabilities: { account: true, downloads: false, invite: false },
+        account,
         noticeKey: null,
       },
     };
@@ -53,7 +106,7 @@ export function companionStateMessage(
     source: "porchcast-web",
     type: "state",
     payload: {
-      revision: access.room.revision,
+      revision,
       porch: {
         id: access.room.id,
         title: access.room.title,
@@ -65,6 +118,7 @@ export function companionStateMessage(
         downloads: access.role === "host" && access.room.currentRecordingId !== null,
         invite: access.role === "host" && access.room.settings.maxGuests > 0,
       },
+      account,
       noticeKey: status === "ready" && access.room.currentRecordingId
         ? `${access.room.currentRecordingId}:ready`
         : null,

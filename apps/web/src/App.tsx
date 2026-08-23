@@ -38,7 +38,11 @@ import {
 } from "react";
 
 import { AccountDialog } from "./AccountDialog";
-import { companionStateMessage, isCompanionStateRequest } from "./companion-bridge";
+import {
+  companionLaunchIntent,
+  companionStateMessage,
+  isCompanionStateRequest,
+} from "./companion-bridge";
 import {
   chatEmojis,
   insertChatEmoji,
@@ -2849,12 +2853,15 @@ function AdmissionGate({
 export function App() {
   const account = useAccount();
   const [surface, setSurface] = useState<"booking" | "home">(() => (
-    new URLSearchParams(window.location.search).get("book") === "1" ? "booking" : "home"
+    companionLaunchIntent(window.location.search) === "book" ? "booking" : "home"
   ));
   const [publicPage, setPublicPage] = useState<PublicAppPage>(() => (
     publicAppPageFromPath(window.location.pathname)
   ));
-  const [accountOpen, setAccountOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(() => (
+    companionLaunchIntent(window.location.search) === "account"
+  ));
+  const companionRevisionRef = useRef(0);
   const previousRecordingActiveRef = useRef(false);
   const [access, setAccess] = useState<RoomAccess | null>(null);
   const [importedRoom, setImportedRoom] = useState<ImportedVdoRoom | null>(null);
@@ -2901,15 +2908,30 @@ export function App() {
   }, [access?.room.title, importedRoom?.roomName, publicPage]);
 
   useEffect(() => {
-    const message = companionStateMessage(access, recordingActive);
-    const publish = () => window.postMessage(message, window.location.origin);
+    const publish = () => {
+      companionRevisionRef.current = Math.max(Date.now(), companionRevisionRef.current + 1);
+      window.postMessage(companionStateMessage(access, recordingActive, {
+        status: account.status,
+        signedIn: Boolean(account.snapshot.account),
+        rooms: account.rooms,
+        recordingLibrary: account.recordingLibrary,
+      }, companionRevisionRef.current), window.location.origin);
+    };
     const receiveRequest = (event: MessageEvent<unknown>) => {
       if (isCompanionStateRequest(event)) publish();
     };
     publish();
     window.addEventListener("message", receiveRequest);
     return () => window.removeEventListener("message", receiveRequest);
-  }, [access, recordingActive]);
+  }, [account.recordingLibrary, account.rooms, account.snapshot.account, account.status, access, recordingActive]);
+
+  function closeAccount() {
+    setAccountOpen(false);
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("account") !== "1") return;
+    url.searchParams.delete("account");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
 
   function navigatePublicPage(page: PublicAppPage, search = "") {
     const target = `${appPagePath(page)}${search}`;
@@ -3310,7 +3332,7 @@ export function App() {
         currentRoom={access?.role === "host" ? access.room : null}
         hostToken={hostToken}
         model={account}
-        onClose={() => setAccountOpen(false)}
+        onClose={closeAccount}
         onRoomDeleted={(roomId) => {
           localStorage.removeItem(roomTokenKey(roomId));
           localStorage.removeItem(roomInviteKey(roomId));
