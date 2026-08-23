@@ -5,15 +5,16 @@
   "private": true,
   "type": "module",
   "workspaces": [
+    "apps/extension",
     "apps/web",
     "packages/contracts"
   ],
   "scripts": {
-    "build": "npm run build -w @wiplash/podcast-contracts && npm run build -w @wiplash/podcast-web",
+    "build": "npm run build -w @wiplash/podcast-contracts && npm run build -w @wiplash/podcast-web && npm run build -w @wiplash/porchcast-extension",
     "dev": "npm run build -w @wiplash/podcast-contracts && npm run dev -w @wiplash/podcast-web",
-    "test": "npm run build -w @wiplash/podcast-contracts && npm run test -w @wiplash/podcast-contracts && npm run test -w @wiplash/podcast-web",
+    "test": "npm run build -w @wiplash/podcast-contracts && npm run test -w @wiplash/podcast-contracts && npm run test -w @wiplash/podcast-web && npm run test -w @wiplash/porchcast-extension",
     "test:responsive": "playwright test",
-    "typecheck": "npm run build -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-web",
+    "typecheck": "npm run build -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-contracts && npm run typecheck -w @wiplash/podcast-web && npm run typecheck -w @wiplash/porchcast-extension",
     "boundary:check": "node scripts/check-public-boundary.mjs && node scripts/check-gateway-boundary.mjs",
     "verify": "npm run boundary:check && npm run test && npm run typecheck && npm run build && npm run test:responsive"
   },

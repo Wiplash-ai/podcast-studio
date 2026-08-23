@@ -666,3 +666,53 @@ export type RoomArtifact = z.infer<typeof roomArtifactSchema>;
 export const roomArtifactListSchema = z.object({
   artifacts: z.array(roomArtifactSchema).max(10_000),
 });
+
+export const porchcastCompanionStatusSchema = z.enum([
+  "unknown",
+  "live",
+  "recording",
+  "rendering",
+  "ready",
+  "attention",
+]);
+
+export type PorchcastCompanionStatus = z.infer<typeof porchcastCompanionStatusSchema>;
+
+export const porchcastCompanionPorchSchema = z.object({
+  id: z.string().regex(/^[A-Za-z0-9_-]{6,80}$/),
+  title: z.string().trim().min(1).max(120),
+  role: roomRoleSchema,
+}).strict();
+
+export const porchcastCompanionSnapshotSchema = z.object({
+  revision: z.number().int().nonnegative(),
+  porch: porchcastCompanionPorchSchema.nullable(),
+  status: porchcastCompanionStatusSchema,
+  capabilities: z.object({
+    account: z.boolean(),
+    downloads: z.boolean(),
+    invite: z.boolean(),
+  }).strict(),
+  noticeKey: z.string().regex(/^[A-Za-z0-9:_-]{1,160}$/).nullable(),
+}).strict();
+
+export type PorchcastCompanionSnapshot = z.infer<typeof porchcastCompanionSnapshotSchema>;
+
+export const porchcastCompanionStateMessageSchema = z.object({
+  protocol: z.literal("porchcast-companion"),
+  version: z.literal(1),
+  source: z.literal("porchcast-web"),
+  type: z.literal("state"),
+  payload: porchcastCompanionSnapshotSchema,
+}).strict();
+
+export type PorchcastCompanionStateMessage = z.infer<typeof porchcastCompanionStateMessageSchema>;
+
+export const porchcastCompanionStateRequestSchema = z.object({
+  protocol: z.literal("porchcast-companion"),
+  version: z.literal(1),
+  source: z.literal("porchcast-extension"),
+  type: z.literal("state_request"),
+}).strict();
+
+export type PorchcastCompanionStateRequest = z.infer<typeof porchcastCompanionStateRequestSchema>;

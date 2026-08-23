@@ -1,7 +1,28 @@
 # Porchcast browser extension roadmap
 
-Status: planned on 2026-08-22; implementation and store submission require
+Status: implementation started on 2026-08-23; store submission still requires
 separate authorization.
+
+The first implemented vertical slice now includes:
+
+- one source build producing Chromium MV3 service-worker and Firefox MV3
+  non-persistent-background variants;
+- the minimum `activeTab`, `scripting`, and `storage` permission set, one exact
+  Porchcast content-script match, no toolbar popup, and no media APIs;
+- an exact-field, versioned, token-free web-to-extension state bridge;
+- a Shadow DOM widget with pointer drag, keyboard movement, viewport clamping,
+  collapse, close/reopen, Book/Open/Pricing actions, and token-free recent Porch
+  history capped at ten;
+- deterministic contract, history, manifest, remote-code, and media-boundary
+  tests plus 16/32/48/128 pixel cat icons;
+- an isolated BrowserOS 148 loaded-build check covering service-worker startup,
+  widget toggle acknowledgement, keyboard movement, collapse, close/reopen,
+  approved cat rendering, and token-free recent-Porch persistence.
+
+Still open before a store candidate: invite/download/account/leave command
+handoff, recording-ready notification permission and deduplication, offline
+retry UX, reproducible ZIP/source archives, loaded Firefox/Edge/Opera checks,
+the full manual browser matrix, listing assets, signing, and submission.
 
 ## Strategic context
 

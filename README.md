@@ -41,6 +41,28 @@ The production container accepts `VITE_BASE_PATH` and `VITE_API_URL` build
 arguments and serves the static application plus the same-origin API proxy on
 port `8080`.
 
+## Browser companion
+
+The public Manifest V3 source lives in `apps/extension`. One deterministic
+build produces unpacked Chromium and Firefox directories:
+
+```bash
+npm run build -w @wiplash/porchcast-extension
+```
+
+Load `apps/extension/dist/chromium` as an unpacked extension in Chrome,
+BrowserOS, Edge, or Opera. The toolbar action has no popup: it toggles a
+draggable companion inside the active tab. The companion stores only its
+presentation preferences and up to ten recent Porch records containing a
+stable Porch ID, title, role, and visit time. It never stores invitation links,
+room or media capabilities, chat, artifact URLs, or participant media.
+Current BrowserOS developer builds also require the
+`--enable-unsafe-extension-debugging` launch flag for unpacked extensions; that
+flag is not part of a signed store installation.
+
+Firefox uses `apps/extension/dist/firefox`. Store submission, signing, and
+publication remain separate release gates.
+
 ## Security
 
 Room capabilities and media grants are bearer credentials. Do not add real

@@ -38,6 +38,7 @@ import {
 } from "react";
 
 import { AccountDialog } from "./AccountDialog";
+import { companionStateMessage, isCompanionStateRequest } from "./companion-bridge";
 import {
   chatEmojis,
   insertChatEmoji,
@@ -2847,7 +2848,9 @@ function AdmissionGate({
 
 export function App() {
   const account = useAccount();
-  const [surface, setSurface] = useState<"booking" | "home">("home");
+  const [surface, setSurface] = useState<"booking" | "home">(() => (
+    new URLSearchParams(window.location.search).get("book") === "1" ? "booking" : "home"
+  ));
   const [publicPage, setPublicPage] = useState<PublicAppPage>(() => (
     publicAppPageFromPath(window.location.pathname)
   ));
@@ -2896,6 +2899,17 @@ export function App() {
           : "Record remote podcasts in the Cloud with host-controlled rooms, secure sources, and Desktop and Mobile views.";
     }
   }, [access?.room.title, importedRoom?.roomName, publicPage]);
+
+  useEffect(() => {
+    const message = companionStateMessage(access, recordingActive);
+    const publish = () => window.postMessage(message, window.location.origin);
+    const receiveRequest = (event: MessageEvent<unknown>) => {
+      if (isCompanionStateRequest(event)) publish();
+    };
+    publish();
+    window.addEventListener("message", receiveRequest);
+    return () => window.removeEventListener("message", receiveRequest);
+  }, [access, recordingActive]);
 
   function navigatePublicPage(page: PublicAppPage, search = "") {
     const target = `${appPagePath(page)}${search}`;
@@ -3272,7 +3286,7 @@ export function App() {
           }}
           busy={busy}
           onBook={bookRoom}
-          onClose={() => setSurface("home")}
+          onClose={() => navigatePublicPage("home")}
           onPremium={() => navigatePublicPage("pricing", pricingQuery("guest_seats"))}
         />
       ) : null}

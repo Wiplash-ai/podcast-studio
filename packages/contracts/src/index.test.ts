@@ -6,6 +6,8 @@ import {
   STUDIO_ROOM_GUEST_LIMIT,
   accountSnapshotSchema,
   mediaSessionGrantSchema,
+  porchcastCompanionStateMessageSchema,
+  porchcastCompanionStateRequestSchema,
   roomArtifactSchema,
   roomChatMessageSchema,
 } from "./index.js";
@@ -100,6 +102,50 @@ describe("browser-safe Porchcast contracts", () => {
       sizeBytes: 1,
       sha256: "e".repeat(64),
       downloadPath: `/v1/rooms/${roomId}/artifacts/pa_${"d".repeat(32)}`,
+    }).success).toBe(false);
+  });
+
+  it("exposes only bounded, token-free Porchcast companion state", () => {
+    const message = {
+      protocol: "porchcast-companion" as const,
+      version: 1 as const,
+      source: "porchcast-web" as const,
+      type: "state" as const,
+      payload: {
+        revision: 4,
+        porch: { id: roomId, title: "Release notes", role: "host" as const },
+        status: "recording" as const,
+        capabilities: { account: true, downloads: true, invite: true },
+        noticeKey: null,
+      },
+    };
+    expect(porchcastCompanionStateMessageSchema.safeParse(message).success).toBe(true);
+    expect(porchcastCompanionStateMessageSchema.safeParse({
+      ...message,
+      payload: {
+        ...message.payload,
+        porch: { ...message.payload.porch, invitationToken: "secret" },
+      },
+    }).success).toBe(false);
+    expect(porchcastCompanionStateMessageSchema.safeParse({
+      ...message,
+      payload: { ...message.payload, artifactUrl: "https://example.invalid/file.mp4" },
+    }).success).toBe(false);
+  });
+
+  it("accepts only the versioned companion state request", () => {
+    expect(porchcastCompanionStateRequestSchema.safeParse({
+      protocol: "porchcast-companion",
+      version: 1,
+      source: "porchcast-extension",
+      type: "state_request",
+    }).success).toBe(true);
+    expect(porchcastCompanionStateRequestSchema.safeParse({
+      protocol: "porchcast-companion",
+      version: 1,
+      source: "porchcast-extension",
+      type: "state_request",
+      roomToken: "secret",
     }).success).toBe(false);
   });
 });
